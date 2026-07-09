@@ -1,5 +1,5 @@
 # project-4-MediaVault
-This is the repo for Personal Shelf, a personal collection website. Senior Project for CSE499. Project 4
+This is the repo for MediaVault, a personal collection website. Senior Project for CSE499. Project 4
 
 Faith Oluwatise Idowu - "Never Give up"
 
