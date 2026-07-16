@@ -1,20 +1,14 @@
-### ============================================
-### Register a New User
-### ============================================
 
 POST http://localhost:5050/auth/register
 Content-Type: application/json
 
 {
-    "username": "faith",
+    "username": "faih",
     "password": "password123"
 }
 
 ###
 
-### ============================================
-### Login
-### ============================================
 
 POST http://localhost:5050/auth/login
 Content-Type: application/json
@@ -26,10 +20,9 @@ Content-Type: application/json
 
 ###
 
-### ============================================
-### Protected Route
-### Copy the token from the Login response
-### Replace PASTE_TOKEN_HERE with the JWT
-### ============================================
+POST  http://localhost:5050/auth/logout
+
+###
+
 
 GET http://localhost:5050/auth/protected

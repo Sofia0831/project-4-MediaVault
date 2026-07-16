@@ -1,16 +1,15 @@
 import jwt from "jsonwebtoken";
 
-const isLoggedIn = (req, res) => {
-    const token = req.cookies.token;
+export default function isLoggedIn(req) {
+    const token = req.cookies?.token;
 
     if (!token) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
+        return null;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded;
-};
-
-export default isLoggedIn;
+    try {
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+        return null;
+    }
+}

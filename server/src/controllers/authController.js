@@ -66,11 +66,11 @@ authController.login = async (req, res) => {
 
     const user = users.find((u) => u.username === username);
 
-    var decoded = isLoggedIn(req, res);
+    const decoded = isLoggedIn(req);
 
-    if (user.username == decoded.username){
-        return res.status(401).json({
-            message: "Already logged in as user"
+    if (decoded && decoded.username === username) {
+        return res.status(400).json({
+            message: "Already logged in."
         });
     }
 
@@ -109,6 +109,19 @@ authController.login = async (req, res) => {
       message: err.message
     });
   }
+};
+
+authController.logout = async (req, res) => {
+    const token = req.cookies?.token;
+    if (token) {
+        res.clearCookie("token", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false // change to true when using HTTPS
+        });
+        res.json({ message: 'Logged out successfully' });
+    }
+    
 };
 
 // Protected
