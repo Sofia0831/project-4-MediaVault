@@ -12,11 +12,8 @@ const LandingPage = ({ onLogin }) => {
           media collection.
         </p>
         
-        <button 
-          onClick={onLogin} 
-          style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}
-        >
-          Get Started (Sign In)
+        <button className="action-btn" onClick={onLogin}>
+          Sign In
         </button>
       </section>
     </main>
