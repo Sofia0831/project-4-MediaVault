@@ -4,8 +4,8 @@ import "./App.css";
 
 import HeaderNav from "./components/HeaderNav";
 import Footer from "./components/Footer";
-import LandingPage from "./components/LandingPage";
-import Dashboard from "./components/Dashboard";
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
