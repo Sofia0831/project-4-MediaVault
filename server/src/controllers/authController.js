@@ -112,16 +112,15 @@ authController.login = async (req, res) => {
 };
 
 authController.logout = async (req, res) => {
-    const token = req.cookies?.token;
-    if (token) {
-        res.clearCookie("token", {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: false // change to true when using HTTPS
-        });
-        res.json({ message: 'Logged out successfully' });
-    }
-    
+  const token = req.cookies?.token;
+  if (token) {
+      res.clearCookie("token", {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: false // change to true when using HTTPS
+      });
+      res.json({ message: 'Logged out successfully' });
+  }   
 };
 
 // Protected
