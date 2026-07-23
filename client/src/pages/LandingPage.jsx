@@ -15,7 +15,7 @@ const LandingPage = () => {
           media collection.
         </p>
         
-        <button className="action-btn" onClick={() => navigate("/auth")}>
+        <button className="action-btn" onClick={() => navigate("/login")}>
           Get Started
         </button>
       </section>
