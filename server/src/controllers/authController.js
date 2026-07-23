@@ -13,15 +13,15 @@ const authController = {};
 // Register
 authController.register = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!username || !password) {
+    if (!username || !email || !password) {
       return res.status(400).json({
-        message: "Username and password are required."
+        message: "Username, email and password are required."
       });
     }
 
-    const existingUser = users.find((u) => u.username === username);
+    const existingUser = users.find((u) => u.username === username && u.email == email);
 
     if (existingUser) {
       return res.status(409).json({
@@ -30,14 +30,20 @@ authController.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    var date = Date.now();
 
     users.push({
       username,
+      email,
+      date,
+      date,
       password: hashedPassword
     });
 
+    console.log(users);
+
     const token = jwt.sign(
-        { username },
+        { username, email },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
@@ -62,13 +68,13 @@ authController.register = async (req, res) => {
 // Login
 authController.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = users.find((u) => u.username === username);
+    const user = users.find((u) => u.email == email);
 
     const decoded = isLoggedIn(req);
 
-    if (decoded && decoded.username === username) {
+    if (decoded && decoded.email == email) {
         return res.status(400).json({
             message: "Already logged in."
         });
@@ -88,8 +94,9 @@ authController.login = async (req, res) => {
       });
     }
 
+    var username = user.username;
     const token = jwt.sign(
-        { username },
+        { username, email },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
