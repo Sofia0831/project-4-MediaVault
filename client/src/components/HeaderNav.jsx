@@ -1,11 +1,14 @@
 import React, {useState} from "react";
-import "../components/HeaderNav.css"
+import "../components/HeaderNav.css";
+import { useNavigate } from "react-router-dom";
 
 const HeaderNav = ({isLoggedIn}) => {
     const [isOpen, setIsOpen] = useState(false);
     const toggleMenu = () => {
         setIsOpen(!isOpen);
     };
+
+    const navigate = useNavigate();
 
     return (
         <header className="header">
@@ -27,8 +30,8 @@ const HeaderNav = ({isLoggedIn}) => {
                 </button>
 
                 <nav className={`nav-bar ${isOpen ? "show": ""}`}>
-                    <button className="nav-button">Home</button>
-                    <button className="nav-button">Shelf</button>
+                    <button className="nav-button" onClick={() => navigate("/dashboard")}>Home</button>
+                    <button className="nav-button" onClick={() => navigate("/shelf")}>Shelf</button>
                     <button className="nav-button">Profile</button>
                     <button className="nav-button">Logout</button>
                 </nav>

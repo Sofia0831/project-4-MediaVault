@@ -8,6 +8,10 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
+import Shelf from "./pages/Shelf";
+import MovieCatalogue from "./pages/MovieCatalogue";
+import MovieDetails from "./pages/MovieDetails";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,6 +41,19 @@ function App() {
             path="/dashboard" 
             element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" replace />} 
           />
+
+          <Route path="/shelf" 
+          element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />} 
+          />
+
+          <Route path="/movies" 
+          element={isLoggedIn ? <MovieCatalogue /> : <Navigate to="/login" replace />} 
+          />
+
+          <Route path="/movies/:id" 
+          element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />} 
+          />
+
         </Routes>
         
         <Footer />
