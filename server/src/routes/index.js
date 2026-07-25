@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
   res.send("Hello Express!");
 });
 
-router.get("/api/health", (_req, res) => {
+router.get("/health", (_req, res) => {
   res.json({
     status: "ok",
     message: "MediaVault API is running",
@@ -17,13 +17,8 @@ router.get("/api/health", (_req, res) => {
 });
 
 
-
 router.use("/auth", authRouter);
 
-router.get("/user",  (req, res) =>{
-    res.send(UserModel.getUserByEmail("sofia@example.com"))
-  }
-)
 
 
 export default router;

@@ -29,7 +29,7 @@ const RegisterPage = ({ onRegister }) => {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/auth/register",
+        "http://localhost:5050/api/auth/register",
         {
           method: "POST",
           headers: {

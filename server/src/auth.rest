@@ -1,5 +1,5 @@
 
-POST http://localhost:5050/auth/register
+POST http://localhost:5050/api/auth/register
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 ###
 
 
-POST http://localhost:5050/auth/login
+POST http://localhost:5050/api/auth/login
 Content-Type: application/json
 
 {
@@ -21,12 +21,12 @@ Content-Type: application/json
 
 ###
 
-POST  http://localhost:5050/auth/logout
+POST  http://localhost:5050/api/auth/logout
 
 ###
 
 
-GET http://localhost:5050/auth/protected
+GET http://localhost:5050/api/auth/protected
 
 ###
 GET https://api.jikan.moe/v4/seasons/upcoming
@@ -36,6 +36,3 @@ GET https://www.googleapis.com/books/v1/volumes?q=harry+potter&key=AIzaSyAoyoJVF
 
 ###
 GET https://api.themoviedb.org/3/search/movie?query=Interstellar&api_key=2caab5a9684faf0879e326386157a472
-
-###
-GET http://localhost:5050/user

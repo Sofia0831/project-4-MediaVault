@@ -1,75 +1,138 @@
-import pool from "../database/index.js"
+import pool from "../database/index.js";
 
 const UserModel = {};
 
 /* *****************************
-*   Register new account
-* *************************** */
-UserModel.registerUser = async (username, email, password) => {
+ * Register User
+ * ***************************** */
+UserModel.registerUser = async (username, email, passwordHash) => {
   try {
-    const sql = "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *"
-    return await pool.query(sql, [username, email, password])
-  } catch (error) {
-    return error.message
-  }
-}
+    const sql = `
+      INSERT INTO users (username, email, password_hash)
+      VALUES ($1, $2, $3)
+      RETURNING id, username, email, created_at;
+    `;
 
-/* **********************
- *   Check for existing email
- * ********************* */
-UserModel.checkExistingEmail = async (email) => {
-  try {
-    const sql = "SELECT * FROM users WHERE email = $1"
-    const email = await pool.query(sql, [email])
-    return email.rowCount
+    const result = await pool.query(sql, [
+      username,
+      email,
+      passwordHash,
+    ]);
+
+    return result.rows[0];
   } catch (error) {
-    return error.message
+    throw error;
   }
-}
+};
 
 /* *****************************
-* Return account data using email address
-* ***************************** */
+ * Check Existing Email
+ * ***************************** */
+UserModel.checkExistingEmail = async (email) => {
+  try {
+    const sql = `
+      SELECT 1
+      FROM users
+      WHERE email = $1
+      LIMIT 1;
+    `;
+
+    const result = await pool.query(sql, [email]);
+
+    return result.rowCount > 0;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/* *****************************
+ * Get User by Email
+ * ***************************** */
 UserModel.getUserByEmail = async (email) => {
   try {
-    const result = await pool.query(
-      'SELECT id, username, email, password_hash FROM users WHERE email = $1',
-      [email])
-    return result.rows[0]
-  } catch (error) {
-    return new Error("No matching email found")
-  }
-}
+    const sql = `
+      SELECT id, username, email, password_hash
+      FROM users
+      WHERE email = $1;
+    `;
 
+    const result = await pool.query(sql, [email]);
+
+    return result.rows[0] || null;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/* *****************************
+ * Get User by ID
+ * ***************************** */
 UserModel.getUserById = async (id) => {
   try {
-    const result = await pool.query(
-      'SELECT id, username, email, password_hash FROM users WHERE id = $1',
-      [id])
-    return result.rows[0]
-  } catch (error) {
-    return new Error("No matching user ID found")
-  }
-}
+    const sql = `
+      SELECT id, username, email, password_hash
+      FROM users
+      WHERE id = $1;
+    `;
 
-UserModel.updateAccountInfo = async (username, email, id) =>{
-  try {
-    const sql = 'UPDATE public.users SET username = $1, email = $2 WHERE account_id = $3 RETURNING *'
-    const result = await pool.query(sql, [username, email, id])
-    return result.rows[0]
-  } catch (error) {
-    return new Error("Unable to update user information")
-  }
-} 
+    const result = await pool.query(sql, [id]);
 
-UserModel.updatePassword = async (password, id) =>{
-  try {
-    const sql = 'UPDATE public.users SET password_hash = $1 WHERE id = $2 RETURNING *'
-    const result = await pool.query(sql, [password, id])
-    return result.rows[0]
+    return result.rows[0] || null;
   } catch (error) {
-    return new Error("Unable to update user password")
+    throw error;
   }
-}
+};
+
+/* *****************************
+ * Update Account Info
+ * ***************************** */
+UserModel.updateAccountInfo = async (username, email, id) => {
+  try {
+    const sql = `
+      UPDATE users
+      SET
+        username = $1,
+        email = $2,
+        updated_at = NOW()
+      WHERE id = $3
+      RETURNING id, username, email, updated_at;
+    `;
+
+    const result = await pool.query(sql, [
+      username,
+      email,
+      id,
+    ]);
+
+    return result.rows[0] || null;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/* *****************************
+ * Update Password
+ * ***************************** */
+UserModel.updatePassword = async (passwordHash, id) => {
+  try {
+    const sql = `
+      UPDATE users
+      SET
+        password_hash = $1,
+        updated_at = NOW()
+      WHERE id = $2
+      RETURNING id;
+    `;
+
+    const result = await pool.query(sql, [
+      passwordHash,
+      id,
+    ]);
+
+    return result.rows[0] || null;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export default UserModel;

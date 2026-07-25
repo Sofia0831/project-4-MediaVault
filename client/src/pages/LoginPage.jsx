@@ -28,7 +28,7 @@ const LoginPage = ({ onLogin }) => {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/auth/login",
+        "http://localhost:5050/api/auth/login",
         {
           method: "POST",
           headers: {
