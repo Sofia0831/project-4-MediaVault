@@ -12,7 +12,7 @@ const MovieDetails = () => {
   // User Interactive State
   const [isAddedToShelf, setIsAddedToShelf] = useState(false);
   const [status, setStatus] = useState("");
-  
+
   // Review State
   const [review, setReview] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
@@ -77,8 +77,8 @@ const MovieDetails = () => {
     <div className="movie-details-container">
       {/* Optional Backdrop Banner */}
       {backdropUrl && (
-        <div 
-          className="details-backdrop" 
+        <div
+          className="details-backdrop"
           style={{ backgroundImage: `url(${backdropUrl})` }}
         />
       )}
@@ -142,7 +142,7 @@ const MovieDetails = () => {
               onClick={() => setIsEditingReview(true)}
             >
               Write A Review
-            </button>          
+            </button>
             </div>
         ) : (
           <div className="action-col" />

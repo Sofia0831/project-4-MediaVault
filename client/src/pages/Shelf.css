@@ -83,7 +83,7 @@
 
 @media (max-width: 768px) {
   .shelf-columns-container {
-    grid-template-columns: 1fr; 
+    grid-template-columns: 1fr;
     gap: 2.5rem;
     margin: 1rem auto;
   }

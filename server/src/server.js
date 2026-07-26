@@ -1,19 +1,29 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import router from "./routes/index.js";
 import cookieParser from "cookie-parser";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+
+import router from "./routes/index.js";
+import pool from "./database/index.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5050;
 
-app.use(cors());
+
+app.use(cors({
+  origin: "http://localhost:5173", // your frontend
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/", router);
+
+app.use("/api", router);
 
 app.listen(PORT, () => {
   console.log(`MediaVault API running at http://localhost:${PORT}`);

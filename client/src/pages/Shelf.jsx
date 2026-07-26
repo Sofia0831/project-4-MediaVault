@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Shelf.css";
 
-// mock data 
+// mock data
 const INITIAL_DATA = [
   { id: "1", title: "Inception", media_type: "movie", status: "plan" },
   { id: "2", title: "Interstellar", media_type: "movie", status: "in_progress" },
@@ -21,7 +21,7 @@ const Shelf = ({ mediaItems = INITIAL_DATA }) => {
   return (
     <div className="shelf-dashboard">
       <div className="shelf-columns-container">
-        
+
         {/* ================= MOVIE COLUMN ================= */}
         <div className="shelf-column">
           <button className="category-banner-btn" onClick={() => navigate("/movies")}>

@@ -5,7 +5,7 @@ import "./Media.css";
 
 const MovieCatalogue = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeQuery, setActiveQuery] = useState(""); 
+  const [activeQuery, setActiveQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
