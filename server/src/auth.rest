@@ -28,11 +28,3 @@ POST  http://localhost:5050/api/auth/logout
 
 GET http://localhost:5050/api/auth/protected
 
-###
-GET https://api.jikan.moe/v4/seasons/upcoming
-
-###
-GET https://www.googleapis.com/books/v1/volumes?q=harry+potter&key=AIzaSyAoyoJVFmsK4UBPSvjZPfoG7WbtgZ0fM5U
-
-###
-GET https://api.themoviedb.org/3/search/movie?query=Interstellar&api_key=2caab5a9684faf0879e326386157a472
