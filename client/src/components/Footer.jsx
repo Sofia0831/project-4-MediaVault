@@ -10,7 +10,11 @@ const Footer = () => {
         fontFamily: "sans-serif",
         width: "100%",
         boxSizing: "border-box",
-        textAlign: "center"
+        textAlign: "center",
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        zIndex: 1000
     };
 
     return (

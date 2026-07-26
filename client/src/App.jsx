@@ -18,6 +18,8 @@ import Dashboard from "./pages/Dashboard";
 import Shelf from "./pages/Shelf";
 import MovieCatalogue from "./pages/MovieCatalogue";
 import MovieDetails from "./pages/MovieDetails";
+import BookCatalogue from "./pages/BookCatalogue";
+import BookDetails from "./pages/BookDetails";
 
 
 function AppRoutes() {
@@ -84,6 +86,14 @@ function AppRoutes() {
 
           <Route path="/movies/:id"
           element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/books" 
+          element={isLoggedIn ? <BookCatalogue /> : <Navigate to="/login" replace />} 
+          />
+
+          <Route path="/books/:id" 
+          element={isLoggedIn ? <BookDetails /> : <Navigate to="/login" replace />} 
           />
 
         </Routes>

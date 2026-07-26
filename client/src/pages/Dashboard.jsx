@@ -20,7 +20,7 @@ const Dashboard = () => {
 
           <div className="media-card">
             <div className="card-header"><h3>Top 10 Books</h3></div>
-            <div className="card-body"><button className="action-btn">Add Books</button></div>
+            <div className="card-body"><button className="action-btn" onClick={() => navigate("/books")}>Add Books</button></div>
           </div>
         </div>
       </section>
