@@ -1,149 +1,197 @@
 import dotenv from "dotenv";
-import jwt, { decode } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import cookieParser from "cookie-parser";
-import isLoggedIn from "../utils/isLoggedIn.js"; 
+
+import isLoggedIn from "../utils/isLoggedIn.js";
+import UserModel from "../models/userModel.js";
 
 dotenv.config();
 
-const users = [];
-
 const authController = {};
 
-// Register
+/* *****************************
+ * Register
+ * ***************************** */
 authController.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({
-        message: "Username, email and password are required."
+        message: "Username, email and password are required.",
       });
     }
 
-    const existingUser = users.find((u) => u.username === username && u.email == email);
+    // Check if email already exists
+    const existingUser = await UserModel.getUserByEmail(email);
 
     if (existingUser) {
       return res.status(409).json({
-        message: "User already exists."
+        message: "Email already exists.",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    var date = Date.now();
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
 
-    users.push({
+    // Save user
+    const user = await UserModel.registerUser(
       username,
       email,
-      date,
-      date,
-      password: hashedPassword
-    });
-
-    console.log(users);
-
-    const token = jwt.sign(
-        { username, email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+      passwordHash
     );
 
+    // Create JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    console.log("Registered");
+
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,      // true when using HTTPS
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000 // 1 hour
+      httpOnly: true,
+      secure: false, // true when using HTTPS
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000,
     });
 
-    res.status(201).json({
-      message: "User registered successfully."
+    return res.status(201).json({
+      message: "User registered successfully.",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (err) {
-    res.status(500).json({
-      message: err.message
+    console.error(err);
+
+    return res.status(500).json({
+      message: err.message,
     });
   }
 };
 
-// Login
+/* *****************************
+ * Login
+ * ***************************** */
 authController.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = users.find((u) => u.email == email);
-
+    // Already logged in?
     const decoded = isLoggedIn(req);
 
-    if (decoded && decoded.email == email) {
-        return res.status(400).json({
-            message: "Already logged in."
-        });
+    if (decoded && decoded.email === email) {
+      return res.status(400).json({
+        message: "Already logged in.",
+      });
     }
+
+    // Find user in database
+    const user = await UserModel.getUserByEmail(email);
 
     if (!user) {
       return res.status(401).json({
-        message: "Invalid credentials."
+        message: "Invalid email or password.",
       });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    // Compare passwords
+    const validPassword = await bcrypt.compare(
+      password,
+      user.password_hash
+    );
 
     if (!validPassword) {
       return res.status(401).json({
-        message: "Invalid credentials."
+        message: "Invalid email or password.",
       });
     }
 
-    var username = user.username;
+    // Create JWT
     const token = jwt.sign(
-        { username, email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
     );
 
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,      // true when using HTTPS
-        sameSite: "lax",
-        maxAge: 60 * 60 * 1000 // 1 hour
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000,
     });
 
-    res.json({
-        message: "Login successful"
+    console.log("Logged in");
+
+    return res.json({
+      message: "Login successful.",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
     });
+
   } catch (err) {
-    res.status(500).json({
-      message: err.message
+    console.error(err);
+
+    return res.status(500).json({
+      message: err.message,
     });
   }
 };
 
-authController.logout = async (req, res) => {
-  const token = req.cookies?.token;
-  if (token) {
-      res.clearCookie("token", {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: false // change to true when using HTTPS
-      });
-      res.json({ message: 'Logged out successfully' });
-  }   
+/* *****************************
+ * Logout
+ * ***************************** */
+authController.logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+
+  return res.json({
+    message: "Logged out successfully.",
+  });
 };
 
-// Protected
+/* *****************************
+ * Protected Route
+ * ***************************** */
 authController.protected = async (req, res) => {
   try {
-    var decoded = isLoggedIn(req, res);
-    console.log(decoded);
+    const decoded = isLoggedIn(req);
 
-    res.status(200).json({
+    if (!decoded) {
+      return res.status(401).json({
+        message: "Invalid or expired token.",
+      });
+    }
+
+    return res.status(200).json({
       message: "Access granted.",
-      user: decoded
+      user: decoded,
     });
-
   } catch (err) {
-    res.status(401).json({
-      message: "Invalid or expired token."
+    return res.status(401).json({
+      message: "Invalid or expired token.",
     });
   }
 };
