@@ -1,0 +1,109 @@
+.shelf-dashboard {
+  background-color: #1a1a1a;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+}
+
+.shelf-columns-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1000px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  flex: 1;
+}
+
+.shelf-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-banner-btn {
+  background-color: #e59d42;
+  color: #ffffff;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: background-color 0.2s;
+}
+
+.category-banner-btn:hover {
+  background-color: #d48c31;
+}
+
+/* Status Cards */
+.status-box {
+  border: 2px solid #ffffff;
+  background-color: #242424;
+  border-radius: 4px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+}
+
+.status-header {
+  border-bottom: 2px solid #ffffff;
+  padding: 0.6rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.status-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.placeholder-text {
+  color: #aaaaaa;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: auto;
+}
+
+.mini-item-card {
+  background-color: #333333;
+  padding: 0.5rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  border: 1px solid #444444;
+}
+
+@media (max-width: 768px) {
+  .shelf-columns-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    margin: 1rem auto;
+  }
+
+  .category-banner-btn {
+    font-size: 1.25rem;
+    padding: 0.85rem;
+  }
+
+  .status-header {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shelf-columns-container {
+    padding: 0 0.75rem;
+  }
+
+  .status-box {
+    min-height: 120px;
+  }
+}

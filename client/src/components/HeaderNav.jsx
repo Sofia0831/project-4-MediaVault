@@ -1,17 +1,27 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import "../components/HeaderNav.css";
 
-const HeaderNav = ({ isLoggedIn, onLogout }) => {
+const HeaderNav = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isLoggedIn, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+
   const handleLogout = async () => {
     try {
-      await onLogout();
+      await logout();
       setIsOpen(false);
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -37,14 +47,20 @@ const HeaderNav = ({ isLoggedIn, onLogout }) => {
           </button>
 
           <nav className={`nav-bar ${isOpen ? "show" : ""}`}>
-            <button className="nav-button">Home</button>
-            <button className="nav-button">Shelf</button>
-            <button className="nav-button">Profile</button>
-
             <button
               className="nav-button"
-              onClick={handleLogout}
+              onClick={() => handleNavigate("/dashboard")}
             >
+              Home
+            </button>
+            <button
+              className="nav-button"
+              onClick={() => handleNavigate("/shelf")}
+            >
+              Shelf
+            </button>
+            <button className="nav-button">Profile</button>
+            <button className="nav-button" onClick={handleLogout}>
               Logout
             </button>
           </nav>

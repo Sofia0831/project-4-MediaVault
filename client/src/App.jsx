@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,55 +7,23 @@ import {
 } from "react-router-dom";
 import "./App.css";
 
+import { AuthProvider } from "./context/AuthContext";
+import useAuth from "./hooks/useAuth";
 import HeaderNav from "./components/HeaderNav";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
+import Shelf from "./pages/Shelf";
+import MovieCatalogue from "./pages/MovieCatalogue";
+import MovieDetails from "./pages/MovieDetails";
+import BookCatalogue from "./pages/BookCatalogue";
+import BookDetails from "./pages/BookDetails";
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkLogin();
-  }, []);
-
-  const checkLogin = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5050/api/auth/protected",
-        {
-          method: "GET",
-          credentials: "include", // send the cookie
-        }
-      );
-
-      if (response.ok) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
-    } catch (err) {
-      setIsLoggedIn(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = async () => {
-    await fetch("http://localhost:5050/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    setIsLoggedIn(false);
-  };
+function AppRoutes() {
+  const { isLoggedIn, user, loading } = useAuth();
 
   if (loading) {
     return <h2>Loading...</h2>;
@@ -64,10 +32,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <HeaderNav
-          isLoggedIn={isLoggedIn}
-          onLogout={handleLogout}
-        />
+        <HeaderNav />
 
         <Routes>
           <Route path="/" element={!isLoggedIn ? (
@@ -75,14 +40,14 @@ function App() {
               ) : (
                 <Navigate to="/dashboard" replace />
               )
-            } 
+            }
           />
 
           <Route
             path="/login"
             element={
               !isLoggedIn ? (
-                <LoginPage onLogin={handleLogin} />
+                <LoginPage />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
@@ -93,7 +58,7 @@ function App() {
             path="/register"
             element={
               !isLoggedIn ? (
-                <RegisterPage onRegister={handleLogin} />
+                <RegisterPage />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
@@ -104,17 +69,46 @@ function App() {
             path="/dashboard"
             element={
               isLoggedIn ? (
-                <Dashboard />
+                <Dashboard user={user} />
               ) : (
                 <Navigate to="/login" replace />
               )
             }
           />
+
+          <Route path="/shelf"
+          element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/movies"
+          element={isLoggedIn ? <MovieCatalogue /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/movies/:id"
+          element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/books" 
+          element={isLoggedIn ? <BookCatalogue /> : <Navigate to="/login" replace />} 
+          />
+
+          <Route path="/books/:id" 
+          element={isLoggedIn ? <BookDetails /> : <Navigate to="/login" replace />} 
+          />
+
         </Routes>
 
         <Footer />
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 

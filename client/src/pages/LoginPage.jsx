@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import "./Auth.css";
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -45,11 +47,7 @@ const LoginPage = ({ onLogin }) => {
         throw new Error(data.message || "Login failed.");
       }
 
-      console.log("Logged in:", data);
-
-      if (onLogin) {
-        onLogin(data);
-      }
+      login(data);
 
       navigate("/dashboard");
     } catch (err) {

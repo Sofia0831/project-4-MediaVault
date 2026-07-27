@@ -179,7 +179,11 @@ authController.protected = async (req, res) => {
   try {
     const decoded = isLoggedIn(req);
 
-    console.log(decoded);
+    if (!decoded) {
+      return res.status(401).json({
+        message: "Invalid or expired token.",
+      });
+    }
 
     return res.status(200).json({
       message: "Access granted.",
