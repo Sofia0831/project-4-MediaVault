@@ -241,7 +241,6 @@ mediaController.updateUserLog = async (req, res) => {
         );
 
         
-
         if (!updated) {
             return res.status(404).json({
                 message: "Media not found."
