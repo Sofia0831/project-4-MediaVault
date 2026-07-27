@@ -35,4 +35,99 @@ GET https://api.jikan.moe/v4/seasons/upcoming
 GET https://www.googleapis.com/books/v1/volumes?q=harry+potter&key={{GOOGLE_BOOKS_API_KEY}}
 
 ###
-GET https://api.themoviedb.org/3/search/movie?query=Interstellar&api_key={{TMDB_API_KEY}}
+
+### Book Details
+GET {{baseUrl}}/api/media/book/OL134834W
+
+###########################################################
+# GLOBAL MEDIA SEARCH
+###########################################################
+
+### Search Everything
+GET {{baseUrl}}/api/media/search?query=One Piece
+
+#############################################################
+# MEDIA CONTROLLER
+#############################################################
+
+### Dashboard
+GET {{baseUrl}}/api/media/dashboard
+
+###
+
+### Get User Shelf
+GET {{baseUrl}}/api/media/shelf
+
+###
+
+### Get One Shelf Item
+GET {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+
+###
+
+### Add Media To Shelf
+POST {{baseUrl}}/api/media/shelf
+Content-Type: application/json
+
+{
+    "media_type": "movie",
+    "external_source": "tmdb",
+    "external_id": "157336",
+    "title": "Interstellar",
+    "creator": "Christopher Nolan",
+    "cover_url": "https://image.tmdb.org/t/p/w500/example.jpg",
+    "release_year": 2014,
+    "genres": [
+        "Science Fiction",
+        "Adventure"
+    ]
+}
+
+###
+
+### Update User Log
+PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+Content-Type: application/json
+
+{
+    "status": "completed",
+    "rating": 5,
+    "review": "One of the best movies I've ever watched.",
+    "started_at": "2026-07-01",
+    "completed_at": "2026-07-15"
+}
+
+###
+
+### Update Status Only
+PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+Content-Type: application/json
+
+{
+    "status": "in_progress"
+}
+
+###
+
+### Update Rating Only
+PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+Content-Type: application/json
+
+{
+    "rating": 4
+}
+
+###
+
+### Update Review Only
+PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+Content-Type: application/json
+
+{
+    "review": "Great story with amazing visuals."
+}
+
+###
+
+### Delete Shelf Item
+DELETE {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
