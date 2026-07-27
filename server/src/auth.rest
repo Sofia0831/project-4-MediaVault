@@ -164,10 +164,6 @@ GET {{baseUrl}}/api/media/book/OL134834W
 ### Search Everything
 GET {{baseUrl}}/api/media/search?query=One Piece
 
-###########################################################
-# USER SHELF
-###########################################################
-
 #############################################################
 # MEDIA CONTROLLER
 #############################################################
@@ -252,4 +248,4 @@ Content-Type: application/json
 ###
 
 ### Delete Shelf Item
-DELETE {{baseUrl}}/api/media/shelf/REPLACE_WITH_SHELF_ID
+DELETE {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
