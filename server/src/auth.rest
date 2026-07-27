@@ -1,38 +1,251 @@
+@baseUrl =http://localhost:5050
 
-POST http://localhost:5050/api/auth/register
+###########################################################
+# AUTH
+###########################################################
+
+### Register
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-    "username": "faith",
-    "email": "donto@faith.com",
-    "password": "password123"
+    "username":"idowu",
+    "email":"faith@test.com",
+    "password":"password123"
 }
 
 ###
 
-
-POST http://localhost:5050/api/auth/login
+### Login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "donto@faith.com",
-    "password": "password123"
+    "email":"faith@test.com",
+    "password":"password123"
 }
 
 ###
 
-POST  http://localhost:5050/api/auth/logout
+### Protected Route
+GET {{baseUrl}}/api/auth/protected
+
+###
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+
+###########################################################
+# MOVIES (TMDB)
+###########################################################
+
+### Search Movies
+GET {{baseUrl}}/api/media/movies/search?query=Interstellar
+
+###
+
+### Popular Movies
+GET {{baseUrl}}/api/media/movies/popular
+
+###
+
+### Trending Movies
+GET {{baseUrl}}/api/media/movies/trending
+
+###
+
+### Movie Recommendations
+GET {{baseUrl}}/api/media/movies/recommendations?id=157336
+
+###
+
+### Movie Details
+GET {{baseUrl}}/api/media/movies/157336
+
+###########################################################
+# TV
+###########################################################
+
+### Search TV
+GET {{baseUrl}}/api/media/tv/search?query=Breaking Bad
+
+###
+
+### Trending TV
+GET {{baseUrl}}/api/media/tv/trending
+
+###
+
+### Popular TV
+GET {{baseUrl}}/api/media/tv/popular
+
+###
+
+### TV Recommendations
+GET {{baseUrl}}/api/media/tv/recommendations?id=1396
+
+###
+
+### TV Details
+GET {{baseUrl}}/api/media/tv/1396
+
+###########################################################
+# ANIME
+###########################################################
+
+### Search Anime
+GET {{baseUrl}}/api/media/anime/search?query=Naruto
+
+###
+
+### Top Anime
+GET {{baseUrl}}/api/media/anime/top
+
+
+###
+
+### Current Season
+GET {{baseUrl}}/api/media/anime/season/current
+
+###
+
+### Upcoming Season
+GET {{baseUrl}}/api/media/anime/season/upcoming
+
+###
+
+### Anime Details
+GET {{baseUrl}}/api/media/anime/20
+
+###########################################################
+# MANGA
+###########################################################
+
+### Search Manga
+GET {{baseUrl}}/api/media/manga/search?query=Berserk
+
+###
+
+### Top Manga
+GET {{baseUrl}}/api/media/manga/top
 
 ###
 
 
-GET http://localhost:5050/api/auth/protected
+### Manga Details
+GET {{baseUrl}}/api/media/manga/dc332d04-d3b0-413c-a767-70f5e451b031
+
+###########################################################
+# BOOKS
+###########################################################
+
+### Search Books
+GET {{baseUrl}}/api/media/books/search?query=flower
 
 ###
-GET https://api.jikan.moe/v4/seasons/upcoming
+
+### Popular Books
+GET {{baseUrl}}/api/media/books/popular
 
 ###
-GET https://www.googleapis.com/books/v1/volumes?q=harry+potter&key={{GOOGLE_BOOKS_API_KEY}}
+
+### Recommended Books
+GET {{baseUrl}}/api/media/books/recommendations
 
 ###
-GET https://api.themoviedb.org/3/search/movie?query=Interstellar&api_key={{TMDB_API_KEY}}
+
+### Book Details
+GET {{baseUrl}}/api/media/books/OL47138177M
+
+###########################################################
+# GLOBAL MEDIA SEARCH
+###########################################################
+
+### Search Everything
+GET {{baseUrl}}/api/media/search?query=One Piece
+
+#############################################################
+# MEDIA CONTROLLER
+#############################################################
+
+### Dashboard
+GET {{baseUrl}}/api/media/dashboard
+
+###
+
+### Get User Shelf
+GET {{baseUrl}}/api/media/shelf
+
+###
+
+### Get One Shelf Item
+GET {{baseUrl}}/api/media/shelf/01338aa7-ec0a-4634-bc60-46c90b7c6293
+
+###
+
+### Add Media To Shelf
+POST {{baseUrl}}/api/media/shelf
+Content-Type: application/json
+
+{
+    "media_type": "movie",
+    "external_source": "tmdb",
+    "external_id": "157336",
+    "title": "Interstellar",
+    "creator": "Christopher Nolan",
+    "cover_url": "https://image.tmdb.org/t/p/w500/example.jpg",
+    "release_year": 2014,
+    "genres": [
+        "Science Fiction",
+        "Adventure"
+    ]
+}
+
+###
+
+### Update User Log
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
+Content-Type: application/json
+
+{
+    "status": "completed",
+    "rating": 5,
+    "review": "One of the best movies I've ever watched.",
+    "started_at": "2026-07-01",
+    "completed_at": "2026-07-15"
+}
+
+###
+
+### Update Status Only
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
+Content-Type: application/json
+
+{
+    "status": "in_progress"
+}
+
+###
+
+### Update Rating Only
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
+Content-Type: application/json
+
+{
+    "rating": 4
+}
+
+###
+
+### Update Review Only
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
+Content-Type: application/json
+
+{
+    "review": "Great story with amazing visuals."
+}
+
+###
+
+### Delete Shelf Item
+DELETE {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
