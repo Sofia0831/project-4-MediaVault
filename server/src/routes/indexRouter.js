@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import express from "express";
-import authRouter from "./auth.js";
-import UserModel from "../models/userModel.js"
+import authRouter from "./authRouter.js";
+import UserModel from "../models/userModel.js";
+import mediaRouter from "./mediaRouter.js";
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.get("/health", (_req, res) => {
 
 router.use("/auth", authRouter);
 
+router.use("/media", mediaRouter);
 
 
 export default router;

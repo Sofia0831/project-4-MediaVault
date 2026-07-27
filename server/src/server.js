@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 
-import router from "./routes/index.js";
+import router from "./routes/indexRouter.js";
 import pool from "./database/index.js";
 
 dotenv.config();

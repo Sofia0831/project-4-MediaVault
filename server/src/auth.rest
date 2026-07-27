@@ -1,38 +1,156 @@
+@baseUrl =http://localhost:5050
 
-POST http://localhost:5050/api/auth/register
+###########################################################
+# AUTH
+###########################################################
+
+### Register
+POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-    "username": "faith",
-    "email": "donto@faith.com",
-    "password": "password123"
+    "username":"idowu",
+    "email":"faith@test.com",
+    "password":"password123"
 }
 
 ###
 
-
-POST http://localhost:5050/api/auth/login
+### Login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "donto@faith.com",
-    "password": "password123"
+    "email":"faith@test.com",
+    "password":"password123"
 }
 
 ###
 
-POST  http://localhost:5050/api/auth/logout
+### Protected Route
+GET {{baseUrl}}/api/auth/protected
+
+###
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+
+###########################################################
+# MOVIES (TMDB)
+###########################################################
+
+### Search Movies
+GET {{baseUrl}}/api/media/movie/search?query=Interstellar
+
+###
+
+### Popular Movies
+GET {{baseUrl}}/api/media/movie/popular
+
+###
+
+### Trending Movies
+GET {{baseUrl}}/api/media/movie/trending
+
+###
+
+### Movie Recommendations
+GET {{baseUrl}}/api/media/movie/recommendations?id=157336
+
+###
+
+### Movie Details
+GET {{baseUrl}}/api/media/movie/157336
+
+###########################################################
+# TV
+###########################################################
+
+### Search TV
+GET {{baseUrl}}/api/media/tv/search?query=Breaking Bad
+
+###
+
+### Trending TV
+GET {{baseUrl}}/api/media/tv/trending
+
+###
+
+### Popular TV
+GET {{baseUrl}}/api/media/tv/popular
+
+###
+
+### TV Recommendations
+GET {{baseUrl}}/api/media/tv/recommendations?id=1396
+
+###
+
+### TV Details
+GET {{baseUrl}}/api/media/tv/1396
+
+###########################################################
+# ANIME
+###########################################################
+
+### Search Anime
+GET {{baseUrl}}/api/media/anime/search?query=Naruto
+
+###
+
+### Top Anime
+GET {{baseUrl}}/api/media/anime/top
+
+
+###
+
+### Current Season
+GET {{baseUrl}}/api/media/anime/season/current
+
+###
+
+### Upcoming Season
+GET {{baseUrl}}/api/media/anime/season/upcoming
+
+###
+
+### Anime Details
+GET {{baseUrl}}/api/media/anime/20
+
+###########################################################
+# MANGA
+###########################################################
+
+### Search Manga
+GET {{baseUrl}}/api/media/manga/search?query=Berserk
+
+###
+
+### Top Manga
+GET {{baseUrl}}/api/media/manga/top
 
 ###
 
 
-GET http://localhost:5050/api/auth/protected
+### Manga Details
+GET {{baseUrl}}/api/media/manga/dc332d04-d3b0-413c-a767-70f5e451b031
+
+###########################################################
+# BOOKS
+###########################################################
+
+### Search Books
+GET {{baseUrl}}/api/media/book/search?query=flower
 
 ###
-GET https://api.jikan.moe/v4/seasons/upcoming
+
+### Popular Books
+GET {{baseUrl}}/api/media/book/popular
 
 ###
-GET https://www.googleapis.com/books/v1/volumes?q=harry+potter&key={{GOOGLE_BOOKS_API_KEY}}
+
+### Recommended Books
+GET {{baseUrl}}/api/media/book/recommendations
 
 ###
 
