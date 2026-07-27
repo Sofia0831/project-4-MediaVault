@@ -201,7 +201,7 @@ mediaController.updateUserLog = async (req, res) => {
             started_at,
             completed_at
         } = req.body;
-
+        
         if (
             rating !== undefined &&
             rating !== null &&
@@ -240,6 +240,8 @@ mediaController.updateUserLog = async (req, res) => {
             }
         );
 
+        
+
         if (!updated) {
             return res.status(404).json({
                 message: "Media not found."
@@ -249,7 +251,6 @@ mediaController.updateUserLog = async (req, res) => {
         res.status(200).json(updated);
 
     } catch (error) {
-
         res.status(500).json({
             message: error.message
         });

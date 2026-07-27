@@ -40,27 +40,27 @@ POST {{baseUrl}}/api/auth/logout
 ###########################################################
 
 ### Search Movies
-GET {{baseUrl}}/api/media/movie/search?query=Interstellar
+GET {{baseUrl}}/api/media/movies/search?query=Interstellar
 
 ###
 
 ### Popular Movies
-GET {{baseUrl}}/api/media/movie/popular
+GET {{baseUrl}}/api/media/movies/popular
 
 ###
 
 ### Trending Movies
-GET {{baseUrl}}/api/media/movie/trending
+GET {{baseUrl}}/api/media/movies/trending
 
 ###
 
 ### Movie Recommendations
-GET {{baseUrl}}/api/media/movie/recommendations?id=157336
+GET {{baseUrl}}/api/media/movies/recommendations?id=157336
 
 ###
 
 ### Movie Details
-GET {{baseUrl}}/api/media/movie/157336
+GET {{baseUrl}}/api/media/movies/157336
 
 ###########################################################
 # TV
@@ -140,22 +140,22 @@ GET {{baseUrl}}/api/media/manga/dc332d04-d3b0-413c-a767-70f5e451b031
 ###########################################################
 
 ### Search Books
-GET {{baseUrl}}/api/media/book/search?query=flower
+GET {{baseUrl}}/api/media/books/search?query=flower
 
 ###
 
 ### Popular Books
-GET {{baseUrl}}/api/media/book/popular
+GET {{baseUrl}}/api/media/books/popular
 
 ###
 
 ### Recommended Books
-GET {{baseUrl}}/api/media/book/recommendations
+GET {{baseUrl}}/api/media/books/recommendations
 
 ###
 
 ### Book Details
-GET {{baseUrl}}/api/media/book/OL134834W
+GET {{baseUrl}}/api/media/books/OL47138177M
 
 ###########################################################
 # GLOBAL MEDIA SEARCH
@@ -179,7 +179,7 @@ GET {{baseUrl}}/api/media/shelf
 ###
 
 ### Get One Shelf Item
-GET {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+GET {{baseUrl}}/api/media/shelf/01338aa7-ec0a-4634-bc60-46c90b7c6293
 
 ###
 
@@ -204,7 +204,7 @@ Content-Type: application/json
 ###
 
 ### Update User Log
-PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
 Content-Type: application/json
 
 {
@@ -218,7 +218,7 @@ Content-Type: application/json
 ###
 
 ### Update Status Only
-PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
 Content-Type: application/json
 
 {
@@ -228,7 +228,7 @@ Content-Type: application/json
 ###
 
 ### Update Rating Only
-PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
 Content-Type: application/json
 
 {
@@ -238,7 +238,7 @@ Content-Type: application/json
 ###
 
 ### Update Review Only
-PUT {{baseUrl}}/api/media/shelf/e5e6865c-f8a3-4f6a-8512-386a6daef7e2
+PUT {{baseUrl}}/api/media/shelf/e7863580-2d97-4aa5-b0c3-998deb526660
 Content-Type: application/json
 
 {
