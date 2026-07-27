@@ -1,58 +1,146 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import StarRating from "../components/StarRating";
+import StatusDropdown from "../components/StatusDropdown";
 import { getMovieDetails, TMDB_IMAGE_BASE_URL } from "../services/tmdbApi";
-import StatusModal from "../components/StatusModal";
+import {
+  addShelfItem,
+  deleteShelfItem,
+  getShelf,
+  updateShelfItem,
+} from "../services/mediaShelfApi";
 import "./MovieDetails.css";
+
+const getReleaseYear = (releaseDate) => {
+  if (!releaseDate) return null;
+  const year = Number(releaseDate.split("-")[0]);
+  return Number.isNaN(year) ? null : year;
+};
 
 const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // User Interactive State
-  const [isAddedToShelf, setIsAddedToShelf] = useState(false);
-  const [status, setStatus] = useState("");
-
-  // Review State
-  const [review, setReview] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
 
-  // Modal State
-  const [showStatusModal, setShowStatusModal] = useState(false);
-
   useEffect(() => {
     const fetchDetails = async () => {
-      setLoading(true);
-      const data = await getMovieDetails(id);
-      setMovie(data);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError("");
+        const [movieData, shelf] = await Promise.all([
+          getMovieDetails(id),
+          getShelf(),
+        ]);
+
+        setMovie(movieData);
+
+        const existingItem = shelf.find(
+          (item) =>
+            item.media_type === "movie" &&
+            item.external_source === "tmdb" &&
+            String(item.external_id) === String(id)
+        );
+
+        setShelfItem(existingItem || null);
+        setReviewInput(existingItem?.review || "");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchDetails();
   }, [id]);
 
-  const handleAddToShelf = () => {
-    setIsAddedToShelf(true);
+  const buildMoviePayload = () => {
+    const posterUrl = movie.poster_path
+      ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
+      : null;
+
+    return {
+      media_type: "movie",
+      external_source: "tmdb",
+      external_id: String(movie.id),
+      title: movie.title,
+      creator: movie.production_companies?.[0]?.name || null,
+      cover_url: posterUrl,
+      release_year: getReleaseYear(movie.release_date),
+      genres: movie.genres?.map((genre) => genre.name) || [],
+      status: "plan",
+    };
   };
 
-  const handleSaveReview = (e) => {
-    e.preventDefault();
-    if (reviewInput.trim()) {
-      setReview(reviewInput);
-      setIsEditingReview(false);
+  const handleAddToShelf = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      const added = await addShelfItem(buildMoviePayload());
+      setShelfItem(added);
+      setReviewInput(added.review || "");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDeleteReview = () => {
-    setReview("");
+  const updateCurrentShelfItem = async (updates) => {
+    if (!shelfItem) return;
+
+    const previousItem = shelfItem;
+    setShelfItem({ ...shelfItem, ...updates });
+
+    try {
+      setSaving(true);
+      setError("");
+      const updated = await updateShelfItem(shelfItem.id, updates);
+      setShelfItem(updated);
+      setReviewInput(updated.review || "");
+    } catch (err) {
+      setShelfItem(previousItem);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveReview = async (event) => {
+    event.preventDefault();
+    await updateCurrentShelfItem({ review: reviewInput.trim() || null });
+    setIsEditingReview(false);
+  };
+
+  const handleDeleteReview = async () => {
+    await updateCurrentShelfItem({ review: null });
     setReviewInput("");
     setIsEditingReview(false);
   };
 
-  const handleSelectStatus = (selectedStatus) => {
-    setStatus(selectedStatus);
-    setShowStatusModal(false);
+  const handleRemoveFromShelf = async () => {
+    if (!shelfItem) return;
+
+    const previousItem = shelfItem;
+    setShelfItem(null);
+    setReviewInput("");
+    setIsEditingReview(false);
+
+    try {
+      setSaving(true);
+      setError("");
+      await deleteShelfItem(previousItem.id);
+    } catch (err) {
+      setShelfItem(previousItem);
+      setReviewInput(previousItem.review || "");
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="loading-state">Loading details...</div>;
@@ -75,7 +163,8 @@ const MovieDetails = () => {
 
   return (
     <div className="movie-details-container">
-      {/* Optional Backdrop Banner */}
+      {error && <div className="details-error">{error}</div>}
+
       {backdropUrl && (
         <div
           className="details-backdrop"
@@ -83,7 +172,6 @@ const MovieDetails = () => {
         />
       )}
 
-      {/* Top Header Card */}
       <div className="details-header-card">
         <div className="poster-container">
           <img src={posterUrl} alt={movie.title} className="details-poster" />
@@ -96,10 +184,10 @@ const MovieDetails = () => {
           <p className="movie-meta">
             <strong>Release Date:</strong> {movie.release_date || "N/A"} |{" "}
             <strong>Runtime:</strong> {formatRuntime(movie.runtime)} |{" "}
-            <strong>Rating:</strong> {movie.vote_average ? `${movie.vote_average.toFixed(1)}/10` : "N/A"}
+            <strong>Rating:</strong>{" "}
+            {movie.vote_average ? `${movie.vote_average.toFixed(1)}/10` : "N/A"}
           </p>
 
-          {/* Genre Badges */}
           {movie.genres && movie.genres.length > 0 && (
             <div className="genre-container">
               {movie.genres.map((genre) => (
@@ -110,109 +198,128 @@ const MovieDetails = () => {
             </div>
           )}
 
-          <p className="movie-overview">{movie.overview || "No description available."}</p>
+          <p className="movie-overview">
+            {movie.overview || "No description available."}
+          </p>
 
-          {/* Extra Movie Attributes */}
           <div className="extra-info-grid">
             <div>
-              <strong>Original Language:</strong> {movie.original_language?.toUpperCase() || "N/A"}
+              <strong>Original Language:</strong>{" "}
+              {movie.original_language?.toUpperCase() || "N/A"}
             </div>
             <div>
               <strong>Production Status:</strong> {movie.status || "N/A"}
             </div>
           </div>
 
-          {status && <span className="status-badge">Status: {status}</span>}
-
-          {!isAddedToShelf && (
+          {shelfItem ? (
+            <div className="shelf-controls-panel">
+              <StatusDropdown
+                status={shelfItem.status}
+                onChange={(status) => updateCurrentShelfItem({ status })}
+                disabled={saving}
+              />
+              <div>
+                <span className="control-label">Your Rating</span>
+                <StarRating
+                  rating={shelfItem.rating || 0}
+                  onChange={(rating) => updateCurrentShelfItem({ rating })}
+                  disabled={saving}
+                />
+              </div>
+              <button
+                type="button"
+                className="danger-btn"
+                onClick={handleRemoveFromShelf}
+                disabled={saving}
+              >
+                Remove From Shelf
+              </button>
+            </div>
+          ) : (
             <div className="shelf-btn-wrapper">
-              <button className="primary-gold-btn" onClick={handleAddToShelf}>
-                Add Movie to Shelf
+              <button
+                className="primary-gold-btn"
+                onClick={handleAddToShelf}
+                disabled={saving}
+              >
+                {saving ? "Adding..." : "Add Movie to Shelf"}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <div className="action-buttons-row">
-        {!review && !isEditingReview ? (
-          <div className="action-col">
-            <button
-              className="primary-gold-btn wide-btn"
-              onClick={() => setIsEditingReview(true)}
-            >
-              Write A Review
-            </button>
+      {shelfItem && (
+        <>
+          {!shelfItem.review && !isEditingReview && (
+            <div className="action-buttons-row">
+              <button
+                className="primary-gold-btn wide-btn"
+                onClick={() => setIsEditingReview(true)}
+                disabled={saving}
+              >
+                Write A Review
+              </button>
             </div>
-        ) : (
-          <div className="action-col" />
-        )}
+          )}
 
-        <div className="action-col">
-          <button
-            className="primary-gold-btn wide-btn"
-            onClick={() => setShowStatusModal(true)}
-          >
-            {status ? "Change Status" : "Add Status"}
-          </button>
-        </div>
-      </div>
+          {isEditingReview && (
+            <form className="review-editor-box" onSubmit={handleSaveReview}>
+              <h3>{shelfItem.review ? "Edit Your Review" : "Write Your Review"}</h3>
+              <textarea
+                className="review-textarea"
+                rows="4"
+                placeholder="Share your thoughts about this movie..."
+                value={reviewInput}
+                onChange={(event) => setReviewInput(event.target.value)}
+              />
+              <div className="review-editor-actions">
+                <button type="submit" className="primary-gold-btn" disabled={saving}>
+                  Save Review
+                </button>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => {
+                    setReviewInput(shelfItem.review || "");
+                    setIsEditingReview(false);
+                  }}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
 
-      {/* Review Editor Input */}
-      {isEditingReview && (
-        <form className="review-editor-box" onSubmit={handleSaveReview}>
-          <h3>{review ? "Edit Your Review" : "Write Your Review"}</h3>
-          <textarea
-            className="review-textarea"
-            rows="4"
-            placeholder="Share your thoughts about this movie..."
-            value={reviewInput}
-            onChange={(e) => setReviewInput(e.target.value)}
-          />
-          <div className="review-editor-actions">
-            <button type="submit" className="primary-gold-btn">
-              Save Review
-            </button>
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={() => setIsEditingReview(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          {shelfItem.review && !isEditingReview && (
+            <div className="review-display-card">
+              <h3>Review</h3>
+              <p className="review-content">{shelfItem.review}</p>
+              <div className="review-card-actions">
+                <button
+                  className="primary-gold-btn"
+                  onClick={() => {
+                    setReviewInput(shelfItem.review || "");
+                    setIsEditingReview(true);
+                  }}
+                  disabled={saving}
+                >
+                  Edit Review
+                </button>
+                <button
+                  className="danger-btn"
+                  onClick={handleDeleteReview}
+                  disabled={saving}
+                >
+                  Delete Review
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
-
-      {/* Review Display Section */}
-      {review && !isEditingReview && (
-        <div className="review-display-card">
-          <h3>Review</h3>
-          <p className="review-content">{review}</p>
-          <div className="review-card-actions">
-            <button
-              className="primary-gold-btn"
-              onClick={() => {
-                setReviewInput(review);
-                setIsEditingReview(true);
-              }}
-            >
-              Edit Review
-            </button>
-            <button className="danger-btn" onClick={handleDeleteReview}>
-              Delete Review
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Status Modal */}
-      <StatusModal
-        isOpen={showStatusModal}
-        currentStatus={status}
-        onClose={() => setShowStatusModal(false)}
-        onSelectStatus={handleSelectStatus}
-      />
     </div>
   );
 };

@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  max-width: 1000px;
+  max-width: 1100px;
   width: 100%;
   margin: 2rem auto;
   padding: 0 1rem;
@@ -79,6 +79,70 @@
   border-radius: 3px;
   font-size: 0.95rem;
   border: 1px solid #444444;
+}
+
+.mini-item-main {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mini-item-cover {
+  width: 48px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid #555555;
+  flex-shrink: 0;
+}
+
+.mini-item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.mini-item-copy strong {
+  line-height: 1.25;
+}
+
+.mini-item-copy span {
+  color: #bbbbbb;
+  font-size: 0.85rem;
+}
+
+.mini-item-controls {
+  border-top: 1px solid #444444;
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.mini-delete-btn {
+  background-color: transparent;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  color: #fca5a5;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.55rem 0.75rem;
+}
+
+.mini-delete-btn:hover {
+  background-color: #7f1d1d;
+  color: #ffffff;
+}
+
+.shelf-error {
+  background-color: #7f1d1d;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  color: #ffffff;
+  margin: 1rem auto 0;
+  max-width: 1100px;
+  padding: 0.75rem 1rem;
+  width: calc(100% - 2rem);
 }
 
 @media (max-width: 768px) {
