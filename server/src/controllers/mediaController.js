@@ -194,6 +194,12 @@ mediaController.updateUserLog = async (req, res) => {
 
         const item = await mediaModel.getShelfItem(req.params.id);
 
+        if (!item || item.user_id !== user.id) {
+            return res.status(404).json({
+                message: "Media not found."
+            });
+        }
+
         var {
             status,
             rating,
@@ -218,7 +224,7 @@ mediaController.updateUserLog = async (req, res) => {
         if (rating == null) {
             rating = item.rating;
         }
-        if (review == null){
+        if (!Object.prototype.hasOwnProperty.call(req.body, "review")){
             review = item.review;
         }
         if (started_at == null){

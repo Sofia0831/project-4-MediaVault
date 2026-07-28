@@ -119,6 +119,31 @@
   margin-top: 0.5rem;
 }
 
+.details-error {
+  background-color: #7f1d1d;
+  border: 1px solid #dc2626;
+  border-radius: 4px;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.shelf-controls-panel {
+  border-top: 1px dashed #333;
+  display: grid;
+  gap: 1rem;
+  margin-top: auto;
+  max-width: 360px;
+  padding-top: 1rem;
+}
+
+.control-label {
+  color: var(--clr-text-muted);
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
 .shelf-btn-wrapper {
   margin-top: auto;
   align-self: flex-end;

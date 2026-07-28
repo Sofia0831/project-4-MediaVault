@@ -1,62 +1,142 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import StarRating from "../components/StarRating";
+import StatusDropdown from "../components/StatusDropdown";
 import { getBookDetails } from "../services/googleBooksApi";
-import StatusModal from "../components/StatusModal";
+import {
+  addShelfItem,
+  deleteShelfItem,
+  getShelf,
+  updateShelfItem,
+} from "../services/mediaShelfApi";
 import "./MovieDetails.css";
-import BookStatusModal from "../components/BooksStatusModal";
+
+const getReleaseYear = (publishedDate) => {
+  if (!publishedDate) return null;
+  const year = Number(String(publishedDate).slice(0, 4));
+  return Number.isNaN(year) ? null : year;
+};
 
 const BookDetails = () => {
   const { id } = useParams();
   const [book, setBook] = useState(null);
+  const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // User Interactive State
-  const [isAddedToShelf, setIsAddedToShelf] = useState(false);
-  const [status, setStatus] = useState("");
-
-  // Review State
-  const [review, setReview] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
 
-  // Modal State
-  const [showStatusModal, setShowStatusModal] = useState(false);
-
   useEffect(() => {
     const fetchDetails = async () => {
-      setLoading(true);
-      const data = await getBookDetails(id);
-      setBook(data);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError("");
+        const [bookData, shelf] = await Promise.all([
+          getBookDetails(id),
+          getShelf(),
+        ]);
+
+        setBook(bookData);
+
+        const existingItem = shelf.find(
+          (item) =>
+            item.media_type === "book" &&
+            item.external_source === "google_books" &&
+            String(item.external_id) === String(id)
+        );
+
+        setShelfItem(existingItem || null);
+        setReviewInput(existingItem?.review || "");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchDetails();
   }, [id]);
 
-  const handleAddToShelf = () => {
-    setIsAddedToShelf(true);
-  };
+  const buildBookPayload = () => ({
+    media_type: "book",
+    external_source: "google_books",
+    external_id: String(book.id),
+    title: book.title,
+    creator: book.authors?.join(", ") || "Unknown Author",
+    cover_url: book.thumbnail,
+    release_year: getReleaseYear(book.publishedDate),
+    genres: book.categories || [],
+    status: "plan",
+  });
 
-  const handleSaveReview = (e) => {
-    e.preventDefault();
-    if (reviewInput.trim()) {
-      setReview(reviewInput);
-      setIsEditingReview(false);
+  const handleAddToShelf = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      const added = await addShelfItem(buildBookPayload());
+      setShelfItem(added);
+      setReviewInput(added.review || "");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDeleteReview = () => {
-    setReview("");
+  const updateCurrentShelfItem = async (updates) => {
+    if (!shelfItem) return;
+
+    const previousItem = shelfItem;
+    setShelfItem({ ...shelfItem, ...updates });
+
+    try {
+      setSaving(true);
+      setError("");
+      const updated = await updateShelfItem(shelfItem.id, updates);
+      setShelfItem(updated);
+      setReviewInput(updated.review || "");
+    } catch (err) {
+      setShelfItem(previousItem);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveReview = async (event) => {
+    event.preventDefault();
+    await updateCurrentShelfItem({ review: reviewInput.trim() || null });
+    setIsEditingReview(false);
+  };
+
+  const handleDeleteReview = async () => {
+    await updateCurrentShelfItem({ review: null });
     setReviewInput("");
     setIsEditingReview(false);
   };
 
-  const handleSelectStatus = (selectedStatus) => {
-    setStatus(selectedStatus);
-    setShowStatusModal(false);
+  const handleRemoveFromShelf = async () => {
+    if (!shelfItem) return;
+
+    const previousItem = shelfItem;
+    setShelfItem(null);
+    setReviewInput("");
+    setIsEditingReview(false);
+
+    try {
+      setSaving(true);
+      setError("");
+      await deleteShelfItem(previousItem.id);
+    } catch (err) {
+      setShelfItem(previousItem);
+      setReviewInput(previousItem.review || "");
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Utility function to strip raw HTML tags from Google Books description
   const cleanDescription = (html) => {
     if (!html) return "No description available.";
     const tmp = document.createElement("DIV");
@@ -73,7 +153,8 @@ const BookDetails = () => {
 
   return (
     <div className="movie-details-container">
-  
+      {error && <div className="details-error">{error}</div>}
+
       <div className="details-header-card">
         <div className="poster-container">
           <img src={book.thumbnail} alt={book.title} className="details-poster" />
@@ -89,11 +170,10 @@ const BookDetails = () => {
             <strong>Pages:</strong> {book.pageCount ? `${book.pageCount} pgs` : "N/A"}
           </p>
 
-          {/* Category Chips */}
           {book.categories && book.categories.length > 0 && (
             <div className="genre-container">
-              {book.categories.map((category, idx) => (
-                <span key={idx} className="genre-chip">
+              {book.categories.map((category) => (
+                <span key={category} className="genre-chip">
                   {category}
                 </span>
               ))}
@@ -102,97 +182,114 @@ const BookDetails = () => {
 
           <p className="movie-overview">{cleanDescription(book.description)}</p>
 
-          {status && <span className="status-badge">Status: {status}</span>}
-
-          {!isAddedToShelf && (
+          {shelfItem ? (
+            <div className="shelf-controls-panel">
+              <StatusDropdown
+                status={shelfItem.status}
+                onChange={(status) => updateCurrentShelfItem({ status })}
+                disabled={saving}
+              />
+              <div>
+                <span className="control-label">Your Rating</span>
+                <StarRating
+                  rating={shelfItem.rating || 0}
+                  onChange={(rating) => updateCurrentShelfItem({ rating })}
+                  disabled={saving}
+                />
+              </div>
+              <button
+                type="button"
+                className="danger-btn"
+                onClick={handleRemoveFromShelf}
+                disabled={saving}
+              >
+                Remove From Shelf
+              </button>
+            </div>
+          ) : (
             <div className="shelf-btn-wrapper">
-              <button className="primary-gold-btn" onClick={handleAddToShelf}>
-                Add Book to Shelf
+              <button
+                className="primary-gold-btn"
+                onClick={handleAddToShelf}
+                disabled={saving}
+              >
+                {saving ? "Adding..." : "Add Book to Shelf"}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <div className="action-buttons-row">
-        {!review && !isEditingReview ? (
-          <div className="action-col">
-            <button
-              className="primary-gold-btn wide-btn"
-              onClick={() => setIsEditingReview(true)}
-            >
-              Write A Review
-            </button>
-          </div>
-        ) : (
-          <div className="action-col" />
-        )}
+      {shelfItem && (
+        <>
+          {!shelfItem.review && !isEditingReview && (
+            <div className="action-buttons-row">
+              <button
+                className="primary-gold-btn wide-btn"
+                onClick={() => setIsEditingReview(true)}
+                disabled={saving}
+              >
+                Write A Review
+              </button>
+            </div>
+          )}
 
-        <div className="action-col">
-          <button
-            className="primary-gold-btn wide-btn"
-            onClick={() => setShowStatusModal(true)}
-          >
-            {status ? "Change Status" : "Add Status"}
-          </button>
-        </div>
-      </div>
+          {isEditingReview && (
+            <form className="review-editor-box" onSubmit={handleSaveReview}>
+              <h3>{shelfItem.review ? "Edit Your Review" : "Write Your Review"}</h3>
+              <textarea
+                className="review-textarea"
+                rows="4"
+                placeholder="Share your thoughts about this book..."
+                value={reviewInput}
+                onChange={(event) => setReviewInput(event.target.value)}
+              />
+              <div className="review-editor-actions">
+                <button type="submit" className="primary-gold-btn" disabled={saving}>
+                  Save Review
+                </button>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => {
+                    setReviewInput(shelfItem.review || "");
+                    setIsEditingReview(false);
+                  }}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
 
-      {/* Review Editor Input */}
-      {isEditingReview && (
-        <form className="review-editor-box" onSubmit={handleSaveReview}>
-          <h3>{review ? "Edit Your Review" : "Write Your Review"}</h3>
-          <textarea
-            className="review-textarea"
-            rows="4"
-            placeholder="Share your thoughts about this book..."
-            value={reviewInput}
-            onChange={(e) => setReviewInput(e.target.value)}
-          />
-          <div className="review-editor-actions">
-            <button type="submit" className="primary-gold-btn">
-              Save Review
-            </button>
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={() => setIsEditingReview(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          {shelfItem.review && !isEditingReview && (
+            <div className="review-display-card">
+              <h3>Review</h3>
+              <p className="review-content">{shelfItem.review}</p>
+              <div className="review-card-actions">
+                <button
+                  className="primary-gold-btn"
+                  onClick={() => {
+                    setReviewInput(shelfItem.review || "");
+                    setIsEditingReview(true);
+                  }}
+                  disabled={saving}
+                >
+                  Edit Review
+                </button>
+                <button
+                  className="danger-btn"
+                  onClick={handleDeleteReview}
+                  disabled={saving}
+                >
+                  Delete Review
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
-
-      {/* Review Display Section */}
-      {review && !isEditingReview && (
-        <div className="review-display-card">
-          <h3>Review</h3>
-          <p className="review-content">{review}</p>
-          <div className="review-card-actions">
-            <button
-              className="primary-gold-btn"
-              onClick={() => {
-                setReviewInput(review);
-                setIsEditingReview(true);
-              }}
-            >
-              Edit Review
-            </button>
-            <button className="danger-btn" onClick={handleDeleteReview}>
-              Delete Review
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Status Modal */}
-      <BookStatusModal
-        isOpen={showStatusModal}
-        currentStatus={status}
-        onClose={() => setShowStatusModal(false)}
-        onSelectStatus={handleSelectStatus}
-      />
     </div>
   );
 };
