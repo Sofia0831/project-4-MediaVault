@@ -9,12 +9,7 @@
 
 .logo-container {
   display: flex;
-  align-items: center;
   gap: 12px;
-}
-
-.logo-icon {
-  font-size: 2rem;
 }
 
 .logo-text {
@@ -23,6 +18,12 @@
   font-weight: bold;
   color: var(--clr-text-dark);
   letter-spacing: -0.5px;
+}
+
+.logo-img {
+  width: 45px;
+  height: 45px;
+  margin: 0 auto;
 }
 
 .nav-bar {
