@@ -23,10 +23,12 @@ openLibraryService.getBook = (workId) =>
 /* *****************************
  * Popular Books
  * ***************************** */
-openLibraryService.getPopularBooks = () =>
-  apiClient(
-    `${BASE}/search.json?q=bestseller&limit=20`
+openLibraryService.getPopularBooks = (page = 1, limit = 20) => {
+  const offset = (page - 1) * limit; 
+  return apiClient(
+    `${BASE}/search.json?q=bestseller&limit=${limit}&offset=${offset}`
   );
+};
 
 /* *****************************
  * Recommendations
