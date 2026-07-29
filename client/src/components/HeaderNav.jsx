@@ -61,7 +61,8 @@ const HeaderNav = () => {
             >
               Shelf
             </button>
-            <button className="nav-button">Profile</button>
+            <button className="nav-button" onClick={() => handleNavigate("/movies")}>Movies</button>
+            <button className="nav-button" onClick={() => handleNavigate("/books")}>Books</button>
             <button className="nav-button" onClick={handleLogout}>
               Logout
             </button>

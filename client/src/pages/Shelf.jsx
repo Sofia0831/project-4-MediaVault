@@ -9,6 +9,8 @@ import {
 } from "../services/mediaShelfApi";
 import "./Shelf.css";
 
+const ITEMS_PER_PAGE = 5;
+
 const columns = [
   {
     mediaType: "movie",
@@ -38,6 +40,10 @@ const Shelf = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [currentPageMap, setCurrentPageMap] = useState({});
+
+  const [collapsedMap, setCollapsedMap] = useState({});
+
   useEffect(() => {
     const loadShelf = async () => {
       try {
@@ -56,6 +62,20 @@ const Shelf = () => {
 
   const getItems = (type, status) =>
     mediaItems.filter((item) => item.media_type === type && item.status === status);
+
+  const toggleCollapse = (key) => {
+    setCollapsedMap((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handlePageChange = (key, delta) => {
+    setCurrentPageMap((prevMap) => {
+      const current = prevMap[key] || 1;
+      return { ...prevMap, [key]: current + delta };
+    });
+  };
 
   const updateItem = async (id, updates) => {
     const previousItems = mediaItems;
@@ -105,55 +125,107 @@ const Shelf = () => {
             </button>
 
             {column.statuses.map((statusGroup) => {
-              const items = getItems(column.mediaType, statusGroup.value);
+              const allItems = getItems(column.mediaType, statusGroup.value);
+              const sectionKey = `${column.mediaType}-${statusGroup.value}`;
+              const isCollapsed = collapsedMap[sectionKey] || false;
+
+              const currentPage = currentPageMap[sectionKey] || 1;
+              const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE);
+
+              const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+              const paginatedItems = allItems.slice(
+                startIndex,
+                startIndex + ITEMS_PER_PAGE
+              );
 
               return (
                 <div key={statusGroup.value} className="status-box">
-                  <div className="status-header">{statusGroup.label}</div>
-                  <div className="status-content">
-                    {items.length > 0 ? (
-                      items.map((item) => (
-                        <div key={item.id} className="mini-item-card">
-                          <div className="mini-item-main">
-                            {item.cover_url && (
-                              <img
-                                src={item.cover_url}
-                                alt={item.title}
-                                className="mini-item-cover"
-                              />
-                            )}
-                            <div className="mini-item-copy">
-                              <strong>{item.title}</strong>
-                              {item.creator && <span>{item.creator}</span>}
-                              {item.release_year && <span>{item.release_year}</span>}
-                            </div>
-                          </div>
-
-                          <div className="mini-item-controls">
-                            <StatusDropdown
-                              status={item.status}
-                              label="Status"
-                              onChange={(status) => updateItem(item.id, { status })}
-                            />
-                            <StarRating
-                              rating={item.rating || 0}
-                              label={`Rating for ${item.title}`}
-                              onChange={(rating) => updateItem(item.id, { rating })}
-                            />
-                            <button
-                              type="button"
-                              className="mini-delete-btn"
-                              onClick={() => removeItem(item.id)}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="placeholder-text">{statusGroup.empty}</p>
-                    )}
+                  {/* Clickable Header Dropdown Toggle */}
+                  <div
+                    className="status-header"
+                    onClick={() => toggleCollapse(sectionKey)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span>
+                      {statusGroup.label} ({allItems.length})
+                    </span>
+                    <span className={`accordion-arrow ${isCollapsed ? "collapsed" : ""}`}>
+                      ▲
+                    </span>
                   </div>
+
+                  {/* Collapsible Content */}
+                  {!isCollapsed && (
+                    <>
+                      <div className="status-content">
+                        {paginatedItems.length > 0 ? (
+                          paginatedItems.map((item) => (
+                            <div key={item.id} className="mini-item-card">
+                              <div className="mini-item-main">
+                                {item.cover_url && (
+                                  <img
+                                    src={item.cover_url}
+                                    alt={item.title}
+                                    className="mini-item-cover"
+                                  />
+                                )}
+                                <div className="mini-item-copy">
+                                  <strong>{item.title}</strong>
+                                  {item.creator && <span>{item.creator}</span>}
+                                  {item.release_year && <span>{item.release_year}</span>}
+                                </div>
+
+                                <div className="mini-item-controls">
+                                  <StarRating
+                                    rating={item.rating || 0}
+                                    label={`Rating for ${item.title}`}
+                                    onChange={(rating) =>
+                                      updateItem(item.id, { rating })
+                                    }
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  className="mini-delete-btn"
+                                  onClick={() => removeItem(item.id)}
+                                >
+                                  X
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="placeholder-text">{statusGroup.empty}</p>
+                        )}
+                      </div>
+
+                      {/* Pagination Footer */}
+                      {totalPages > 1 && (
+                        <div className="status-pagination">
+                          <button
+                            type="button"
+                            className="page-btn"
+                            disabled={currentPage === 1}
+                            onClick={() => handlePageChange(sectionKey, -1)}
+                          >
+                            &lt;
+                          </button>
+                          <span className="page-info">
+                            {currentPage} / {totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            className="page-btn"
+                            disabled={currentPage === totalPages}
+                            onClick={() => handlePageChange(sectionKey, 1)}
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               );
             })}
