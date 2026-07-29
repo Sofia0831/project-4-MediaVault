@@ -20,6 +20,10 @@
   letter-spacing: -0.5px;
 }
 
+a {
+  text-decoration: none;
+}
+
 .logo-img {
   width: 45px;
   height: 45px;

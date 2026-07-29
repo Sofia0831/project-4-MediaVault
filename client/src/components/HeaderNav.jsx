@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import "../components/HeaderNav.css";
 
@@ -29,12 +29,14 @@ const HeaderNav = () => {
 
   return (
     <header className="header">
-      <div className="logo-container">
-        <span className="logo-icon">
-          <img className="logo-img" src="/logo.png" alt="MediaVault logo" />
-        </span>
-        <h1 className="logo-text">MediaVault</h1>
-      </div>
+      <Link to="/dashboard">
+        <div className="logo-container">
+          <span className="logo-icon">
+            <img className="logo-img" src="/logo.png" alt="MediaVault logo" />
+          </span>
+          <h1 className="logo-text">MediaVault</h1>
+        </div>
+      </Link>
 
       {isLoggedIn && (
         <>
