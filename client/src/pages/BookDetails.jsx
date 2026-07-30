@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
 import { getBookDetails } from "../services/googleBooksApi";
@@ -26,6 +26,7 @@ const BookDetails = () => {
   const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -153,6 +154,15 @@ const BookDetails = () => {
 
   return (
     <div className="movie-details-container">
+      {/* 3. Back Button */}
+      <button 
+        type="button" 
+        className="back-btn" 
+        onClick={() => navigate(-1)}
+      >
+        &larr; Back
+      </button>
+
       {error && <div className="details-error">{error}</div>}
 
       <div className="details-header-card">
