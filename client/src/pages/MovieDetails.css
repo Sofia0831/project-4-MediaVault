@@ -30,7 +30,7 @@
 }
 
 .poster-container {
-  width: 220px;
+  width: 27%;
   flex-shrink: 0;
   border: 1px solid #ffffff;
 }
