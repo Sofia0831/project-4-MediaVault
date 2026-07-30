@@ -55,15 +55,16 @@ const formatBookItem = (item) => {
 /**
  * Popular books for initial load on search page
  */
-export const getPopularBooks = async (page = 1, maxResults = 12) => {
+export const getPopularBooks = async (page = 1, maxResults = 20) => {
   try {
-    const response = await fetch(`${BASE_URL}/popular`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${BASE_URL}/popular?page=${page}&limit=${maxResults}`,
+      { credentials: "include" }
+    );
     if (!response.ok) throw new Error("Failed to fetch books");
-    
+
     const data = await response.json();
-    const items = data.docs || data.items || [];
+    const items = data.docs || data.items || data.works || [];
 
     return {
       results: items.map(formatBookItem),
@@ -74,7 +75,7 @@ export const getPopularBooks = async (page = 1, maxResults = 12) => {
       ),
     };
   } catch (error) {
-    console.error("Google Books Fetch Error:", error);
+    console.error("Books Fetch Error:", error);
     return { results: [], totalItems: 0, totalPages: 1 };
   }
 };
@@ -82,17 +83,18 @@ export const getPopularBooks = async (page = 1, maxResults = 12) => {
 /**
  * Search books by query
  */
-export const searchBooks = async (query, page = 1, maxResults = 12) => {
+export const searchBooks = async (query, page = 1, maxResults = 20) => {
   if (!query.trim()) return getPopularBooks(page, maxResults);
 
   try {
-    const response = await fetch(`${BASE_URL}/search?query=${encodeURIComponent(query)}`, {
-      credentials: "include",
-    });
+    const response = await fetch(
+      `${BASE_URL}/search?query=${encodeURIComponent(query)}&page=${page}&limit=${maxResults}`,
+      { credentials: "include" }
+    );
     if (!response.ok) throw new Error("Failed to search books");
 
     const data = await response.json();
-    const items = data.docs || data.items || [];
+    const items = data.docs || data.items || data.works || [];
 
     return {
       results: items.map(formatBookItem),
@@ -103,7 +105,7 @@ export const searchBooks = async (query, page = 1, maxResults = 12) => {
       ),
     };
   } catch (error) {
-    console.error("Google Books Search Error:", error);
+    console.error("Books Search Error:", error);
     return { results: [], totalItems: 0, totalPages: 1 };
   }
 };
@@ -121,7 +123,7 @@ export const getBookDetails = async (bookId) => {
     const item = await response.json();
     return formatBookItem(item);
   } catch (error) {
-    console.error("Google Books Fetch Details Error:", error);
+    console.error("Books Fetch Details Error:", error);
     return null;
   }
 };

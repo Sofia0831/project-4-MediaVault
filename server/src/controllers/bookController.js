@@ -75,18 +75,13 @@ bookController.getRecommendations = async (req, res) => {
  * ***************************** */
 bookController.getPopularBooks = async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
 
-    const books =
-      await openLibraryService.getPopularBooks();
-
+    const books = await openLibraryService.getPopularBooks(page, limit);
     return res.status(200).json(books);
-
   } catch (error) {
-
-    return res.status(500).json({
-      message: error.message,
-    });
-
+    return res.status(500).json({ message: error.message });
   }
 };
 
