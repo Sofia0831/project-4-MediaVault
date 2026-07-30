@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
 import { getMovieDetails, TMDB_IMAGE_BASE_URL } from "../services/tmdbApi";
@@ -26,6 +26,7 @@ const MovieDetails = () => {
   const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -163,6 +164,16 @@ const MovieDetails = () => {
 
   return (
     <div className="movie-details-container">
+
+      {/* 3. Back Button */}
+      <button 
+        type="button" 
+        className="back-btn" 
+        onClick={() => navigate(-1)}
+      >
+        &larr; Back
+      </button>
+
       {error && <div className="details-error">{error}</div>}
 
       {backdropUrl && (
@@ -173,6 +184,7 @@ const MovieDetails = () => {
       )}
 
       <div className="details-header-card">
+
         <div className="poster-container">
           <img src={posterUrl} alt={movie.title} className="details-poster" />
         </div>
