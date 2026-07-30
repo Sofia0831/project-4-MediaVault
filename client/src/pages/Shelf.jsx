@@ -41,7 +41,6 @@ const Shelf = () => {
   const [error, setError] = useState("");
 
   const [currentPageMap, setCurrentPageMap] = useState({});
-
   const [collapsedMap, setCollapsedMap] = useState({});
 
   useEffect(() => {
@@ -76,6 +75,21 @@ const Shelf = () => {
       return { ...prevMap, [key]: current + delta };
     });
   };
+
+  // Directs user to /movies/:id or /books/:id
+  const handleCardClick = (item) => {
+  const externalId = item.external_id || item.api_id || item.id;
+  if (!externalId) {
+    console.warn("Item missing external ID:", item);
+    return;
+  }
+
+  const targetPath = item.media_type === "movie" 
+    ? `/movies/${externalId}` 
+    : `/books/${externalId}`;
+    
+  navigate(targetPath);
+};
 
   const updateItem = async (id, updates) => {
     const previousItems = mediaItems;
@@ -161,7 +175,11 @@ const Shelf = () => {
                       <div className="status-content">
                         {paginatedItems.length > 0 ? (
                           paginatedItems.map((item) => (
-                            <div key={item.id} className="mini-item-card">
+                            <div
+                              key={item.id}
+                              className="mini-item-card clickable"
+                              onClick={() => handleCardClick(item)}
+                            >
                               <div className="mini-item-main">
                                 {item.cover_url && (
                                   <img
@@ -176,7 +194,10 @@ const Shelf = () => {
                                   {item.release_year && <span>{item.release_year}</span>}
                                 </div>
 
-                                <div className="mini-item-controls">
+                                <div 
+                                  className="mini-item-controls"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <StarRating
                                     rating={item.rating || 0}
                                     label={`Rating for ${item.title}`}
@@ -188,7 +209,10 @@ const Shelf = () => {
                                 <button
                                   type="button"
                                   className="mini-delete-btn"
-                                  onClick={() => removeItem(item.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeItem(item.id);
+                                  }}
                                 >
                                   X
                                 </button>
