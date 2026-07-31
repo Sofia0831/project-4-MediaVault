@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
 import { getBookDetails } from "../services/googleBooksApi";
@@ -10,6 +10,7 @@ import {
   updateShelfItem,
 } from "../services/mediaShelfApi";
 import "./MovieDetails.css";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
 
 const getReleaseYear = (publishedDate) => {
   if (!publishedDate) return null;
@@ -19,6 +20,7 @@ const getReleaseYear = (publishedDate) => {
 
 const BookDetails = () => {
   const { id } = useParams();
+  const { setBreadcrumbTitle } = useBreadcrumb();
   const [book, setBook] = useState(null);
   const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,6 @@ const BookDetails = () => {
   const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -39,6 +40,11 @@ const BookDetails = () => {
         ]);
 
         setBook(bookData);
+
+        // Dynamically set the breadcrumb title to the book's title
+        if (bookData?.title) {
+          setBreadcrumbTitle(bookData.title);
+        }
 
         const existingItem = shelf.find(
           (item) =>
@@ -57,7 +63,10 @@ const BookDetails = () => {
     };
 
     fetchDetails();
-  }, [id]);
+
+
+    return () => setBreadcrumbTitle("");
+  }, [id, setBreadcrumbTitle]);
 
   const buildBookPayload = () => ({
     media_type: "book",
@@ -154,15 +163,6 @@ const BookDetails = () => {
 
   return (
     <div className="movie-details-container">
-      {/* 3. Back Button */}
-      <button 
-        type="button" 
-        className="back-btn" 
-        onClick={() => navigate(-1)}
-      >
-        &larr; Back
-      </button>
-
       {error && <div className="details-error">{error}</div>}
 
       <div className="details-header-card">

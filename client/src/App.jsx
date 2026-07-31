@@ -9,7 +9,7 @@ import "./App.css";
 
 import { AuthProvider } from "./context/AuthContext";
 import useAuth from "./hooks/useAuth";
-import HeaderNav from "./components/HeaderNav";
+import Layout from "./components/Layout";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -21,7 +21,6 @@ import MovieDetails from "./pages/MovieDetails";
 import BookCatalogue from "./pages/BookCatalogue";
 import BookDetails from "./pages/BookDetails";
 
-
 function AppRoutes() {
   const { isLoggedIn, user, loading } = useAuth();
 
@@ -32,17 +31,18 @@ function AppRoutes() {
   return (
     <Router>
       <div className="app-container">
-        <HeaderNav />
-
         <Routes>
-          <Route path="/" element={!isLoggedIn ? (
+          {/* Public Routes (No Layout / Breadcrumbs) */}
+          <Route
+            path="/"
+            element={
+              !isLoggedIn ? (
                 <LandingPage />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
             }
           />
-
           <Route
             path="/login"
             element={
@@ -53,7 +53,6 @@ function AppRoutes() {
               )
             }
           />
-
           <Route
             path="/register"
             element={
@@ -65,37 +64,19 @@ function AppRoutes() {
             }
           />
 
+          {/* Protected Routes Wrapped in Layout */}
           <Route
-            path="/dashboard"
             element={
-              isLoggedIn ? (
-                <Dashboard user={user} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
             }
-          />
-
-          <Route path="/shelf"
-          element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/movies"
-          element={isLoggedIn ? <MovieCatalogue /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/movies/:id"
-          element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/books" 
-          element={isLoggedIn ? <BookCatalogue /> : <Navigate to="/login" replace />} 
-          />
-
-          <Route path="/books/:id" 
-          element={isLoggedIn ? <BookDetails /> : <Navigate to="/login" replace />} 
-          />
-
+          >
+            <Route path="/dashboard" element={<Dashboard user={user} />} />
+            <Route path="/shelf" element={<Shelf />} />
+            <Route path="/movies" element={<MovieCatalogue />} />
+            <Route path="/movies/:id" element={<MovieDetails />} />
+            <Route path="/books" element={<BookCatalogue />} />
+            <Route path="/books/:id" element={<BookDetails />} />
+          </Route>
         </Routes>
 
         <Footer />

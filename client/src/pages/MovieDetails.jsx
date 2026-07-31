@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
 import { getMovieDetails, TMDB_IMAGE_BASE_URL } from "../services/tmdbApi";
@@ -9,6 +9,7 @@ import {
   getShelf,
   updateShelfItem,
 } from "../services/mediaShelfApi";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
 import "./MovieDetails.css";
 
 const getReleaseYear = (releaseDate) => {
@@ -19,6 +20,7 @@ const getReleaseYear = (releaseDate) => {
 
 const MovieDetails = () => {
   const { id } = useParams();
+  const { setBreadcrumbTitle } = useBreadcrumb();
   const [movie, setMovie] = useState(null);
   const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,6 @@ const MovieDetails = () => {
   const [error, setError] = useState("");
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [reviewInput, setReviewInput] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -39,6 +40,8 @@ const MovieDetails = () => {
         ]);
 
         setMovie(movieData);
+        // Set breadcrumb title dynamically for global layout
+        setBreadcrumbTitle(movieData.title);
 
         const existingItem = shelf.find(
           (item) =>
@@ -57,7 +60,10 @@ const MovieDetails = () => {
     };
 
     fetchDetails();
-  }, [id]);
+
+    // Reset breadcrumb title when navigating away
+    return () => setBreadcrumbTitle("");
+  }, [id, setBreadcrumbTitle]);
 
   const buildMoviePayload = () => {
     const posterUrl = movie.poster_path
@@ -164,16 +170,6 @@ const MovieDetails = () => {
 
   return (
     <div className="movie-details-container">
-
-      {/* 3. Back Button */}
-      <button 
-        type="button" 
-        className="back-btn" 
-        onClick={() => navigate(-1)}
-      >
-        &larr; Back
-      </button>
-
       {error && <div className="details-error">{error}</div>}
 
       {backdropUrl && (
@@ -184,7 +180,6 @@ const MovieDetails = () => {
       )}
 
       <div className="details-header-card">
-
         <div className="poster-container">
           <img src={posterUrl} alt={movie.title} className="details-poster" />
         </div>
