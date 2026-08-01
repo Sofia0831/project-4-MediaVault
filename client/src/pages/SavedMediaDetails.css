@@ -1,0 +1,73 @@
+.review-section {
+  background: #1a1a1a;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  margin-top: 1rem;
+  padding: 1.5rem;
+}
+
+.review-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.review-form textarea {
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #fff;
+  min-height: 140px;
+  padding: 0.8rem;
+  resize: vertical;
+  width: 100%;
+}
+
+.review-form textarea:focus {
+  border-color: var(--clr-primary);
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
+}
+
+.review-form-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.review-form-actions .action-btn {
+  margin-top: 0;
+  width: auto;
+}
+
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.review-delete-btn {
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid #ef4444;
+  border-radius: 20px;
+  color: #fca5a5;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.review-delete-btn:hover:not(:disabled) {
+  background: #991b1b;
+  color: #fff;
+}
+
+.review-delete-btn:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 3px;
+}
+
+.review-delete-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

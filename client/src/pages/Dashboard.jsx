@@ -1,29 +1,173 @@
-import React from "react";
-import "./Dashboard.css";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getShelf } from "../services/mediaShelfApi";
+import "./Dashboard.css";
 
-const Dashboard = () => {
+const statusLabels = {
+  plan: "Planned",
+  in_progress: "In progress",
+  completed: "Completed",
+};
+
+const AUTO_ADVANCE_MS = 2000;
+
+const Dashboard = ({ user }) => {
   const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocusWithin, setIsFocusWithin] = useState(false);
+
+  useEffect(() => {
+    const loadSavedMedia = async () => {
+      try {
+        setError("");
+        const shelf = await getShelf();
+        setItems(Array.isArray(shelf) ? shelf : []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSavedMedia();
+  }, []);
+
+  useEffect(() => {
+    if (items.length <= 1 || isHovered || isFocusWithin) {
+      return undefined;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setActiveIndex((index) => (index + 1) % items.length);
+    }, AUTO_ADVANCE_MS);
+
+    return () => window.clearTimeout(timerId);
+  }, [activeIndex, isFocusWithin, isHovered, items.length]);
+
+  const showPrevious = () => {
+    setActiveIndex((index) => (index - 1 + items.length) % items.length);
+  };
+
+  const showNext = () => {
+    setActiveIndex((index) => (index + 1) % items.length);
+  };
+
+  const activeItem = items[activeIndex];
+  const displayName = user?.first_name || user?.name || "there";
 
   return (
     <main className="dashboard-page">
-      <section className="dashboard-content">
-        <div className="quote-box">
-          <h2>Insert Quote Here</h2>
+      <div className="dashboard-content">
+      <section
+        className="saved-carousel"
+        aria-labelledby="saved-carousel-title"
+        aria-live="polite"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocusCapture={() => setIsFocusWithin(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsFocusWithin(false);
+          }
+        }}
+      >
+        <div className="carousel-heading">
+          <div>
+            <p className="eyebrow">Your MediaVault</p>
+            <h1 id="saved-carousel-title">Welcome, {displayName}</h1>
+          </div>
+          {items.length > 0 && <span>{activeIndex + 1} / {items.length}</span>}
         </div>
 
-        <div className="grid-container">
-          <div className="media-card">
-            <div className="card-header"><h3>Top 10 Movies</h3></div>
-            <div className="card-body"><button className="action-btn" onClick={() => navigate("/movies")}>Add Movies</button></div>
-          </div>
+        {loading && <div className="carousel-state">Loading your saved media...</div>}
 
-          <div className="media-card">
-            <div className="card-header"><h3>Top 10 Books</h3></div>
-            <div className="card-body"><button className="action-btn" onClick={() => navigate("/books")}>Add Books</button></div>
+        {!loading && error && (
+          <div className="carousel-state carousel-error" role="alert">
+            <h2>We couldn’t load your shelf.</h2>
+            <p>{error}</p>
           </div>
-        </div>
+        )}
+
+        {!loading && !error && items.length === 0 && (
+          <div className="carousel-state carousel-empty">
+            <h2>Welcome to your new shelf.</h2>
+            <p>Add a movie or book to start your MediaVault collection.</p>
+            <div className="empty-actions">
+              <button className="action-btn" type="button" onClick={() => navigate("/movies")}>Add Movies</button>
+              <button className="action-btn" type="button" onClick={() => navigate("/books")}>Add Books</button>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && activeItem && (
+          <div className="carousel-stage">
+            <button
+              className="carousel-control"
+              type="button"
+              aria-label="Previous saved item"
+              disabled={items.length < 2}
+              onClick={showPrevious}
+            >
+              ‹
+            </button>
+
+            <button
+              className="carousel-item"
+              type="button"
+              onClick={() => navigate(`/shelf/${activeItem.id}`)}
+              aria-label={`View saved details for ${activeItem.title}`}
+            >
+              <div className="carousel-cover-wrap">
+                {activeItem.cover_url ? (
+                  <img src={activeItem.cover_url} alt="" className="carousel-cover" />
+                ) : (
+                  <div className="carousel-cover-placeholder" aria-hidden="true">MV</div>
+                )}
+              </div>
+              <div className="carousel-copy">
+                <span className="carousel-type">{activeItem.media_type}</span>
+                <h2>{activeItem.title}</h2>
+                {activeItem.creator && <p>{activeItem.creator}</p>}
+                <div className="carousel-meta">
+                  {activeItem.rating ? <span aria-label={`${activeItem.rating} out of 5 stars`}>★ {activeItem.rating}/5</span> : null}
+                  {activeItem.status && <span>{statusLabels[activeItem.status] || activeItem.status}</span>}
+                </div>
+              </div>
+            </button>
+
+            <button
+              className="carousel-control"
+              type="button"
+              aria-label="Next saved item"
+              disabled={items.length < 2}
+              onClick={showNext}
+            >
+              ›
+            </button>
+          </div>
+        )}
       </section>
+
+      <div className="grid-container" aria-label="Media catalogues">
+        <div className="media-card">
+          <div className="card-header"><h3>Top 10 Movies</h3></div>
+          <div className="card-body">
+            <button className="action-btn" type="button" onClick={() => navigate("/movies")}>Add Movies</button>
+          </div>
+        </div>
+
+        <div className="media-card">
+          <div className="card-header"><h3>Top 10 Books</h3></div>
+          <div className="card-body">
+            <button className="action-btn" type="button" onClick={() => navigate("/books")}>Add Books</button>
+          </div>
+        </div>
+      </div>
+      </div>
     </main>
   );
 };
