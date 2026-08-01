@@ -57,7 +57,7 @@ const Dashboard = ({ user }) => {
   };
 
   const activeItem = items[activeIndex];
-  const displayName = user?.first_name || user?.name || "there";
+  const displayName = user?.username || "there";
 
   return (
     <main className="dashboard-page">
