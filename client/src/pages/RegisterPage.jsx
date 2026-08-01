@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import { API_BASE_URL } from "../services/apiConfig";
 import "./Auth.css";
 
 const RegisterPage = () => {
@@ -31,7 +32,7 @@ const RegisterPage = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5050/api/auth/register",
+        `${API_BASE_URL}/auth/register`,
         {
           method: "POST",
           headers: {
