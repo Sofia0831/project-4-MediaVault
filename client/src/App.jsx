@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,6 +19,7 @@ import MovieCatalogue from "./pages/MovieCatalogue";
 import MovieDetails from "./pages/MovieDetails";
 import BookCatalogue from "./pages/BookCatalogue";
 import BookDetails from "./pages/BookDetails";
+import SavedMediaDetails from "./pages/SavedMediaDetails";
 
 function AppRoutes() {
   const { isLoggedIn, user, loading } = useAuth();
@@ -69,20 +69,32 @@ function AppRoutes() {
             element={
               isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
             }
-          >
-            <Route path="/dashboard" element={<Dashboard user={user} />} />
+          />
 
-            {/* Shelf & Shelf Media Details */}
-            <Route path="/shelf" element={<Shelf />} />
-            <Route path="/shelf/movies/:id" element={<MovieDetails />} />
-            <Route path="/shelf/books/:id" element={<BookDetails />} />
+          <Route path="/shelf"
+          element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />}
+          />
 
-            {/* General Discovery Catalogues & Details */}
-            <Route path="/movies" element={<MovieCatalogue />} />
-            <Route path="/movies/:id" element={<MovieDetails />} />
-            <Route path="/books" element={<BookCatalogue />} />
-            <Route path="/books/:id" element={<BookDetails />} />
-          </Route>
+          <Route path="/shelf/:id"
+          element={isLoggedIn ? <SavedMediaDetails /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/movies"
+          element={isLoggedIn ? <MovieCatalogue /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/movies/:id"
+          element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/books" 
+          element={isLoggedIn ? <BookCatalogue /> : <Navigate to="/login" replace />} 
+          />
+
+          <Route path="/books/:id" 
+          element={isLoggedIn ? <BookDetails /> : <Navigate to="/login" replace />} 
+          />
+
         </Routes>
 
         <Footer />

@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:5050/api/media";
+import { API_BASE_URL } from "./apiConfig";
+
+const MEDIA_API_URL = `${API_BASE_URL}/media`;
 
 const parseResponse = async (response) => {
   const data = await response.json().catch(() => ({}));
@@ -11,7 +13,16 @@ const parseResponse = async (response) => {
 };
 
 export const getShelf = async () => {
-  const response = await fetch(`${API_BASE_URL}/shelf`, {
+  const response = await fetch(`${MEDIA_API_URL}/shelf`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return parseResponse(response);
+};
+
+export const getShelfItem = async (id) => {
+  const response = await fetch(`${MEDIA_API_URL}/shelf/${id}`, {
     method: "GET",
     credentials: "include",
   });
@@ -20,7 +31,7 @@ export const getShelf = async () => {
 };
 
 export const addShelfItem = async (media) => {
-  const response = await fetch(`${API_BASE_URL}/shelf`, {
+  const response = await fetch(`${MEDIA_API_URL}/shelf`, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -33,7 +44,7 @@ export const addShelfItem = async (media) => {
 };
 
 export const updateShelfItem = async (id, updates) => {
-  const response = await fetch(`${API_BASE_URL}/shelf/${id}`, {
+  const response = await fetch(`${MEDIA_API_URL}/shelf/${id}`, {
     method: "PUT",
     credentials: "include",
     headers: {
@@ -46,7 +57,7 @@ export const updateShelfItem = async (id, updates) => {
 };
 
 export const deleteShelfItem = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/shelf/${id}`, {
+  const response = await fetch(`${MEDIA_API_URL}/shelf/${id}`, {
     method: "DELETE",
     credentials: "include",
   });

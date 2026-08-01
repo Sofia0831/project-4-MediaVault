@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import mediaVaultLogo from "../assets/Logo_MV.png";
 import "../components/HeaderNav.css";
 
 const HeaderNav = () => {
@@ -29,13 +30,13 @@ const HeaderNav = () => {
 
   return (
     <header className="header">
-      <Link to="/dashboard">
-        <div className="logo-container">
-          <span className="logo-icon">
-            <img className="logo-img" src="/logo.png" alt="MediaVault logo" />
-          </span>
-          <h1 className="logo-text">MediaVault</h1>
-        </div>
+      <Link
+        className="logo-link"
+        to={isLoggedIn ? "/dashboard" : "/"}
+        aria-label="MediaVault Home"
+        onClick={() => setIsOpen(false)}
+      >
+        <img className="logo-img" src={mediaVaultLogo} alt="MediaVault Home" />
       </Link>
 
       {isLoggedIn && (

@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:5050/api/media/books";
+import { API_BASE_URL } from "./apiConfig";
+
+const BASE_URL = `${API_BASE_URL}/media/books`;
 
 /**
  * Normalizes book data so image links use HTTPS and fallbacks exist

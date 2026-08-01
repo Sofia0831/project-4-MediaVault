@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating";
-import StatusDropdown from "../components/StatusDropdown";
 import {
   deleteShelfItem,
   getShelf,
@@ -120,6 +119,17 @@ const Shelf = () => {
     }
   };
 
+  const openShelfItem = (id) => {
+    navigate(`/shelf/${id}`);
+  };
+
+  const handleCardKeyDown = (event, id) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openShelfItem(id);
+    }
+  };
+
   if (loading) {
     return <div className="shelf-dashboard loading-state">Loading shelf...</div>;
   }
@@ -177,8 +187,12 @@ const Shelf = () => {
                           paginatedItems.map((item) => (
                             <div
                               key={item.id}
-                              className="mini-item-card clickable"
-                              onClick={() => handleCardClick(item)}
+                              className="mini-item-card"
+                              role="link"
+                              tabIndex={0}
+                              aria-label={`View saved details for ${item.title}`}
+                              onClick={() => openShelfItem(item.id)}
+                              onKeyDown={(event) => handleCardKeyDown(event, item.id)}
                             >
                               <div className="mini-item-main">
                                 {item.cover_url && (
@@ -194,9 +208,10 @@ const Shelf = () => {
                                   {item.release_year && <span>{item.release_year}</span>}
                                 </div>
 
-                                <div 
+                                <div
                                   className="mini-item-controls"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(event) => event.stopPropagation()}
+                                  onKeyDown={(event) => event.stopPropagation()}
                                 >
                                   <StarRating
                                     rating={item.rating || 0}
@@ -209,10 +224,12 @@ const Shelf = () => {
                                 <button
                                   type="button"
                                   className="mini-delete-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                                  aria-label={`Remove ${item.title} from shelf`}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
                                     removeItem(item.id);
                                   }}
+                                  onKeyDown={(event) => event.stopPropagation()}
                                 >
                                   X
                                 </button>

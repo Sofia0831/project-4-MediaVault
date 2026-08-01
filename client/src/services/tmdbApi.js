@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:5050/api/media/movies";
+import { API_BASE_URL } from "./apiConfig";
+
+const BASE_URL = `${API_BASE_URL}/media/movies`;
 export const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 export const getPopularMovies = async (page = 1) => {
