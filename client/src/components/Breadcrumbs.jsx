@@ -7,7 +7,6 @@ const ROUTE_NAME_MAP = {
   shelf: "My Shelf",
   movies: "Movies",
   books: "Books",
-  search: "Search",
   dashboard: "Dashboard",
 };
 
@@ -16,10 +15,24 @@ const Breadcrumbs = () => {
   const navigate = useNavigate();
   const { breadcrumbTitle } = useBreadcrumb();
 
-  const rawPathnames = location.pathname.split("/").filter((x) => x);
-  const pathnames = rawPathnames.filter(
-    (segment) => segment.toLowerCase() !== "dashboard"
-  );
+  const rawSegments = location.pathname.split("/").filter((x) => x);
+
+  const formattedSegments = rawSegments.filter((segment, idx) => {
+    const lower = segment.toLowerCase();
+    if (lower === "dashboard") return false;
+
+    // If path is /shelf/movies/:id or /shelf/books/:id, hide the intermediate "movies"/"books"
+    if (
+      idx > 0 &&
+      rawSegments[idx - 1].toLowerCase() === "shelf" &&
+      (lower === "movies" || lower === "books") &&
+      rawSegments.length > idx + 1
+    ) {
+      return false;
+    }
+
+    return true;
+  });
 
   return (
     <nav aria-label="breadcrumb" className="breadcrumbs-container">
@@ -36,6 +49,7 @@ const Breadcrumbs = () => {
         <span className="breadcrumb-divider">|</span>
 
         <ol className="breadcrumbs-list">
+          {/* Static Home / Dashboard item */}
           <li className="breadcrumb-item">
             {location.pathname === "/dashboard" || location.pathname === "/" ? (
               <span className="breadcrumb-current">Dashboard</span>
@@ -44,11 +58,10 @@ const Breadcrumbs = () => {
             )}
           </li>
 
-          {pathnames.map((value, index) => {
-            const to = `/${rawPathnames
-              .slice(0, rawPathnames.indexOf(value) + 1)
-              .join("/")}`;
-            const isLast = index === pathnames.length - 1;
+          {formattedSegments.map((value, index) => {
+            const rawIndex = rawSegments.lastIndexOf(value);
+            const to = `/${rawSegments.slice(0, rawIndex + 1).join("/")}`;
+            const isLast = index === formattedSegments.length - 1;
 
             let label = ROUTE_NAME_MAP[value.toLowerCase()] || value;
 

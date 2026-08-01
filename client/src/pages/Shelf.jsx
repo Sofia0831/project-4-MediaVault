@@ -76,20 +76,20 @@ const Shelf = () => {
     });
   };
 
-  // Directs user to /movies/:id or /books/:id
+  // Directs user to /shelf/movies/:id or /shelf/books/:id
   const handleCardClick = (item) => {
-  const externalId = item.external_id || item.api_id || item.id;
-  if (!externalId) {
-    console.warn("Item missing external ID:", item);
-    return;
-  }
+    const externalId = item.external_id || item.api_id || item.id;
+    if (!externalId) {
+      console.warn("Item missing external ID:", item);
+      return;
+    }
 
-  const targetPath = item.media_type === "movie" 
-    ? `/movies/${externalId}` 
-    : `/books/${externalId}`;
-    
-  navigate(targetPath);
-};
+    const targetPath = item.media_type === "movie" 
+      ? `/shelf/movies/${externalId}` 
+      : `/shelf/books/${externalId}`;
+      
+    navigate(targetPath);
+  };
 
   const updateItem = async (id, updates) => {
     const previousItems = mediaItems;

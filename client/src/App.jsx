@@ -32,7 +32,7 @@ function AppRoutes() {
     <Router>
       <div className="app-container">
         <Routes>
-          {/* Public Routes (No Layout / Breadcrumbs) */}
+          {/* Public routes */}
           <Route
             path="/"
             element={
@@ -64,14 +64,20 @@ function AppRoutes() {
             }
           />
 
-          {/* Protected Routes Wrapped in Layout */}
+          {/* Protected routes wrapped in Layout */}
           <Route
             element={
               isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
             }
           >
             <Route path="/dashboard" element={<Dashboard user={user} />} />
+
+            {/* Shelf & Shelf Media Details */}
             <Route path="/shelf" element={<Shelf />} />
+            <Route path="/shelf/movies/:id" element={<MovieDetails />} />
+            <Route path="/shelf/books/:id" element={<BookDetails />} />
+
+            {/* General Discovery Catalogues & Details */}
             <Route path="/movies" element={<MovieCatalogue />} />
             <Route path="/movies/:id" element={<MovieDetails />} />
             <Route path="/books" element={<BookCatalogue />} />

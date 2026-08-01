@@ -1,15 +1,18 @@
 import React from "react";
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const displayName = user?.username || "User";
 
   return (
     <main className="dashboard-page">
       <section className="dashboard-content">
         <div className="quote-box">
-          <h2>Insert Quote Here</h2>
+          <h2>Welcome {displayName}!</h2>
         </div>
 
         <div className="grid-container">
