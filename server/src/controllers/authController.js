@@ -8,6 +8,7 @@ import UserModel from "../models/userModel.js";
 dotenv.config();
 
 const authController = {};
+const isProduction = process.env.NODE_ENV === "production";
 
 /* *****************************
  * Register
@@ -58,8 +59,8 @@ authController.register = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // true when using HTTPS
-      sameSite: "lax",
+      secure: isProduction, // true when using HTTPS
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 60 * 60 * 1000,
     });
 
@@ -132,8 +133,8 @@ authController.login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 60 * 60 * 1000,
     });
 
@@ -163,8 +164,8 @@ authController.login = async (req, res) => {
 authController.logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   return res.json({
