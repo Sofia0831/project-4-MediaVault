@@ -21,6 +21,15 @@ export const getShelf = async () => {
   return parseResponse(response);
 };
 
+export const getShelfItem = async (id) => {
+  const response = await fetch(`${MEDIA_API_URL}/shelf/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return parseResponse(response);
+};
+
 export const addShelfItem = async (media) => {
   const response = await fetch(`${MEDIA_API_URL}/shelf`, {
     method: "POST",

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,6 +19,7 @@ import MovieCatalogue from "./pages/MovieCatalogue";
 import MovieDetails from "./pages/MovieDetails";
 import BookCatalogue from "./pages/BookCatalogue";
 import BookDetails from "./pages/BookDetails";
+import SavedMediaDetails from "./pages/SavedMediaDetails";
 
 
 function AppRoutes() {
@@ -78,6 +78,10 @@ function AppRoutes() {
 
           <Route path="/shelf"
           element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />}
+          />
+
+          <Route path="/shelf/:id"
+          element={isLoggedIn ? <SavedMediaDetails /> : <Navigate to="/login" replace />}
           />
 
           <Route path="/movies"
