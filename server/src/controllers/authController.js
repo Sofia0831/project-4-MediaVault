@@ -101,7 +101,7 @@ authController.login = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({
-        message: "Invalid email or password.",
+        message: "Invalid email.",
       });
     }
 
@@ -113,7 +113,7 @@ authController.login = async (req, res) => {
 
     if (!validPassword) {
       return res.status(401).json({
-        message: "Invalid email or password.",
+        message: "Invalid password.",
       });
     }
 
