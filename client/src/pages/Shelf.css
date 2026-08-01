@@ -101,6 +101,19 @@
   border-radius: 3px;
   font-size: 0.95rem;
   border: 1px solid #444444;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.mini-item-card:hover {
+  border-color: var(--clr-primary);
+  transform: translateY(-1px);
+}
+
+.mini-item-card:focus-visible {
+  border-color: var(--clr-primary);
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
 }
 
 .mini-item-main {
