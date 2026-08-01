@@ -177,7 +177,7 @@ authController.logout = (req, res) => {
  * ***************************** */
 authController.protected = async (req, res) => {
   try {
-    const decoded = isLoggedIn(req);
+    const decoded = await isLoggedIn(req);
 
     if (!decoded) {
       return res.status(401).json({
