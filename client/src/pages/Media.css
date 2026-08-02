@@ -5,6 +5,7 @@
   flex-direction: column;
   color: #ffffff;
   padding-top: 1.5rem;
+  border-radius: 10px;
 }
 
 .catalogue-controls {

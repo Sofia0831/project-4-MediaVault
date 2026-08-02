@@ -10,6 +10,7 @@ import {
   updateShelfItem,
 } from "../services/mediaShelfApi";
 import "./MovieDetails.css";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
 
 const getReleaseYear = (publishedDate) => {
   if (!publishedDate) return null;
@@ -19,6 +20,7 @@ const getReleaseYear = (publishedDate) => {
 
 const BookDetails = () => {
   const { id } = useParams();
+  const { setBreadcrumbTitle } = useBreadcrumb();
   const [book, setBook] = useState(null);
   const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +41,11 @@ const BookDetails = () => {
 
         setBook(bookData);
 
+        // Dynamically set the breadcrumb title to the book's title
+        if (bookData?.title) {
+          setBreadcrumbTitle(bookData.title);
+        }
+
         const existingItem = shelf.find(
           (item) =>
             item.media_type === "book" &&
@@ -56,7 +63,10 @@ const BookDetails = () => {
     };
 
     fetchDetails();
-  }, [id]);
+
+
+    return () => setBreadcrumbTitle("");
+  }, [id, setBreadcrumbTitle]);
 
   const buildBookPayload = () => ({
     media_type: "book",

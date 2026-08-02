@@ -30,7 +30,7 @@
 }
 
 .poster-container {
-  width: 220px;
+  width: 27%;
   flex-shrink: 0;
   border: 1px solid #ffffff;
 }
@@ -318,6 +318,25 @@
   font-size: 1.2rem;
 }
 
+.back-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
 
 @media (max-width: 600px) {
   .details-header-card {

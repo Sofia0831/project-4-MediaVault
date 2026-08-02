@@ -40,7 +40,6 @@ const Shelf = () => {
   const [error, setError] = useState("");
 
   const [currentPageMap, setCurrentPageMap] = useState({});
-
   const [collapsedMap, setCollapsedMap] = useState({});
 
   useEffect(() => {
@@ -74,6 +73,21 @@ const Shelf = () => {
       const current = prevMap[key] || 1;
       return { ...prevMap, [key]: current + delta };
     });
+  };
+
+  // Directs user to /shelf/movies/:id or /shelf/books/:id
+  const handleCardClick = (item) => {
+    const externalId = item.external_id || item.api_id || item.id;
+    if (!externalId) {
+      console.warn("Item missing external ID:", item);
+      return;
+    }
+
+    const targetPath = item.media_type === "movie" 
+      ? `/shelf/movies/${externalId}` 
+      : `/shelf/books/${externalId}`;
+      
+    navigate(targetPath);
   };
 
   const updateItem = async (id, updates) => {

@@ -8,7 +8,7 @@ import "./App.css";
 
 import { AuthProvider } from "./context/AuthContext";
 import useAuth from "./hooks/useAuth";
-import HeaderNav from "./components/HeaderNav";
+import Layout from "./components/Layout";
 import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -21,7 +21,6 @@ import BookCatalogue from "./pages/BookCatalogue";
 import BookDetails from "./pages/BookDetails";
 import SavedMediaDetails from "./pages/SavedMediaDetails";
 
-
 function AppRoutes() {
   const { isLoggedIn, user, loading } = useAuth();
 
@@ -32,17 +31,18 @@ function AppRoutes() {
   return (
     <Router>
       <div className="app-container">
-        <HeaderNav />
-
         <Routes>
-          <Route path="/" element={!isLoggedIn ? (
+          {/* Public routes */}
+          <Route
+            path="/"
+            element={
+              !isLoggedIn ? (
                 <LandingPage />
               ) : (
                 <Navigate to="/dashboard" replace />
               )
             }
           />
-
           <Route
             path="/login"
             element={
@@ -53,7 +53,6 @@ function AppRoutes() {
               )
             }
           />
-
           <Route
             path="/register"
             element={
@@ -65,14 +64,10 @@ function AppRoutes() {
             }
           />
 
+          {/* Protected routes wrapped in Layout */}
           <Route
-            path="/dashboard"
             element={
-              isLoggedIn ? (
-                <Dashboard user={user} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
             }
           />
 
