@@ -15,17 +15,36 @@ const Breadcrumbs = () => {
   const navigate = useNavigate();
   const { breadcrumbTitle } = useBreadcrumb();
 
+  const isDashboard =
+    location.pathname === "/dashboard" || location.pathname === "/";
+
+  // Check if navigation explicitly came from the Dashboard
+  const isFromDashboard = location.state?.from === "dashboard";
+
+  // No breadcrumb nav on dashboard
+  if (isDashboard) {
+    return null;
+  }
+
   const rawSegments = location.pathname.split("/").filter((x) => x);
 
   const formattedSegments = rawSegments.filter((segment, idx) => {
     const lower = segment.toLowerCase();
     if (lower === "dashboard") return false;
 
-    // If path is /shelf/movies/:id or /shelf/books/:id, hide the intermediate "movies"/"books"
     if (
       idx > 0 &&
       rawSegments[idx - 1].toLowerCase() === "shelf" &&
       (lower === "movies" || lower === "books") &&
+      rawSegments.length > idx + 1
+    ) {
+      return false;
+    }
+
+    // hide "shelf" segment if from the Dashboard
+    if (
+      isFromDashboard &&
+      lower === "shelf" &&
       rawSegments.length > idx + 1
     ) {
       return false;
@@ -49,13 +68,8 @@ const Breadcrumbs = () => {
         <span className="breadcrumb-divider">|</span>
 
         <ol className="breadcrumbs-list">
-          {/* Static Home / Dashboard item */}
           <li className="breadcrumb-item">
-            {location.pathname === "/dashboard" || location.pathname === "/" ? (
-              <span className="breadcrumb-current">Dashboard</span>
-            ) : (
-              <Link to="/dashboard">Dashboard</Link>
-            )}
+            <Link to="/dashboard">Dashboard</Link>
           </li>
 
           {formattedSegments.map((value, index) => {
