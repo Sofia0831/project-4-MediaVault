@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
 import {
   deleteShelfItem,
   getShelfItem,
@@ -13,6 +14,8 @@ import "./SavedMediaDetails.css";
 const SavedMediaDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setBreadcrumbTitle } = useBreadcrumb(); 
+  
   const [item, setItem] = useState(null);
   const [review, setReview] = useState("");
   const [editingReview, setEditingReview] = useState(false);
@@ -36,6 +39,14 @@ const SavedMediaDetails = () => {
 
     loadItem();
   }, [id]);
+
+  useEffect(() => {
+    if (item?.title) {
+      setBreadcrumbTitle(item.title);
+    }
+
+    return () => setBreadcrumbTitle("");
+  }, [item?.title, setBreadcrumbTitle]);
 
   const updateItem = async (updates) => {
     if (!item) return;
@@ -117,22 +128,33 @@ const SavedMediaDetails = () => {
     );
   }
 
+  const genreList = Array.isArray(item.genres) 
+    ? item.genres 
+    : item.genres ? item.genres.split(",").map(g => g.trim()) : [];
+
   return (
     <main className="movie-details-container">
       {error && <div className="details-error" role="alert">{error}</div>}
 
       <div className="details-header-card">
         {item.cover_url && (
-          <img src={item.cover_url} alt={`${item.title} cover`} className="details-poster" />
+          <div className="poster-container">
+            <img src={item.cover_url} alt={`${item.title} cover`} className="details-poster" />
+          </div>
         )}
 
         <div className="details-info">
           <p className="eyebrow">Saved {item.media_type}</p>
           <h2>{item.title}</h2>
-          {item.creator && <p>{item.creator}</p>}
-          {item.release_year && <p>{item.release_year}</p>}
-          {item.genres?.length > 0 && (
-            <p>{Array.isArray(item.genres) ? item.genres.join(", ") : item.genres}</p>
+          {item.creator && <p className="movie-meta">{item.creator}</p>}
+          {item.release_year && <p className="movie-meta">{item.release_year}</p>}
+          
+          {genreList.length > 0 && (
+            <div className="genre-container">
+              {genreList.map((genre, idx) => (
+                <span key={idx} className="genre-chip">{genre}</span>
+              ))}
+            </div>
           )}
 
           <div className="shelf-controls-panel">

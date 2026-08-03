@@ -36,31 +36,19 @@ function AppRoutes() {
           <Route
             path="/"
             element={
-              !isLoggedIn ? (
-                <LandingPage />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
+              !isLoggedIn ? <LandingPage /> : <Navigate to="/dashboard" replace />
             }
           />
           <Route
             path="/login"
             element={
-              !isLoggedIn ? (
-                <LoginPage />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
+              !isLoggedIn ? <LoginPage /> : <Navigate to="/dashboard" replace />
             }
           />
           <Route
             path="/register"
             element={
-              !isLoggedIn ? (
-                <RegisterPage />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
+              !isLoggedIn ? <RegisterPage /> : <Navigate to="/dashboard" replace />
             }
           />
 
@@ -69,32 +57,18 @@ function AppRoutes() {
             element={
               isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
             }
-          />
+          >
+            <Route path="/dashboard" element={<Dashboard user={user} />} />
+            <Route path="/shelf" element={<Shelf />} />
+            <Route path="/shelf/:id" element={<SavedMediaDetails />} />
+            <Route path="/movies" element={<MovieCatalogue />} />
+            <Route path="/movies/:id" element={<MovieDetails />} />
+            <Route path="/books" element={<BookCatalogue />} />
+            <Route path="/books/:id" element={<BookDetails />} />
+          </Route>
 
-          <Route path="/shelf"
-          element={isLoggedIn ? <Shelf /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/shelf/:id"
-          element={isLoggedIn ? <SavedMediaDetails /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/movies"
-          element={isLoggedIn ? <MovieCatalogue /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/movies/:id"
-          element={isLoggedIn ? <MovieDetails /> : <Navigate to="/login" replace />}
-          />
-
-          <Route path="/books" 
-          element={isLoggedIn ? <BookCatalogue /> : <Navigate to="/login" replace />} 
-          />
-
-          <Route path="/books/:id" 
-          element={isLoggedIn ? <BookDetails /> : <Navigate to="/login" replace />} 
-          />
-
+          {/* Fallback redirect for unknown paths */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
         <Footer />
