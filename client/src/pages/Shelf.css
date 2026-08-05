@@ -51,6 +51,19 @@
   min-height: 140px;
   display: flex;
   flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.status-box.valid-drop-target {
+  border-color: #f4bd67;
+  box-shadow: 0 0 0 3px rgba(229, 157, 66, 0.25);
+}
+
+.status-box.active-drop-target {
+  background-color: #332b20;
+  border-color: #ffc76f;
+  box-shadow: 0 0 0 4px rgba(229, 157, 66, 0.5);
 }
 
 .status-header {
@@ -109,6 +122,11 @@
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
+.mini-item-card.is-dragging {
+  cursor: grabbing;
+  opacity: 0.45;
+}
+
 .mini-item-card:hover {
   border-color: var(--clr-primary);
   transform: translateY(-1px);
@@ -162,6 +180,28 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+}
+
+.mini-status-select {
+  background-color: #242424;
+  border: 1px solid #666666;
+  border-radius: 4px;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  max-width: 10.5rem;
+  padding: 0.35rem 1.75rem 0.35rem 0.45rem;
+}
+
+.mini-status-select:focus-visible {
+  border-color: var(--clr-primary);
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
+}
+
+.mini-status-select:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .mini-delete-btn {

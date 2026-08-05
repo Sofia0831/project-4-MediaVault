@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import {
@@ -9,6 +9,7 @@ import {
 import "./Shelf.css";
 
 const ITEMS_PER_PAGE = 5;
+const VALID_STATUSES = new Set(["plan", "in_progress", "completed"]);
 
 const columns = [
   {
@@ -41,6 +42,10 @@ const Shelf = () => {
 
   const [currentPageMap, setCurrentPageMap] = useState({});
   const [collapsedMap, setCollapsedMap] = useState({});
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [activeDropTarget, setActiveDropTarget] = useState("");
+  const [movingItemIds, setMovingItemIds] = useState(() => new Set());
+  const suppressCardClick = useRef(false);
 
   useEffect(() => {
     const loadShelf = async () => {
@@ -75,23 +80,9 @@ const Shelf = () => {
     });
   };
 
-  // Directs user to /shelf/movies/:id or /shelf/books/:id
-  const handleCardClick = (item) => {
-    const externalId = item.external_id || item.api_id || item.id;
-    if (!externalId) {
-      console.warn("Item missing external ID:", item);
-      return;
-    }
-
-    const targetPath = item.media_type === "movie" 
-      ? `/shelf/movies/${externalId}` 
-      : `/shelf/books/${externalId}`;
-      
-    navigate(targetPath);
-  };
-
   const updateItem = async (id, updates) => {
-    const previousItems = mediaItems;
+    const previousItem = mediaItems.find((item) => item.id === id);
+    setError("");
     setMediaItems((items) =>
       items.map((item) => (item.id === id ? { ...item, ...updates } : item))
     );
@@ -102,9 +93,137 @@ const Shelf = () => {
         items.map((item) => (item.id === id ? updated : item))
       );
     } catch (err) {
-      setMediaItems(previousItems);
+      if (previousItem) {
+        const previousValues = Object.fromEntries(
+          Object.keys(updates).map((key) => [key, previousItem[key]])
+        );
+        setMediaItems((items) =>
+          items.map((item) =>
+            item.id === id ? { ...item, ...previousValues } : item
+          )
+        );
+      }
       setError(err.message);
     }
+  };
+
+  const moveItem = async (item, targetMediaType, targetStatus) => {
+    if (
+      item.media_type !== targetMediaType ||
+      item.status === targetStatus ||
+      !VALID_STATUSES.has(targetStatus)
+    ) {
+      return;
+    }
+
+    const originalStatus = item.status;
+    const sourceKey = `${item.media_type}-${originalStatus}`;
+    const targetKey = `${targetMediaType}-${targetStatus}`;
+
+    setError("");
+    setMovingItemIds((ids) => new Set(ids).add(item.id));
+    setCurrentPageMap((pages) => ({
+      ...pages,
+      [sourceKey]: 1,
+      [targetKey]: 1,
+    }));
+    setMediaItems((items) => {
+      const currentItem = items.find((candidate) => candidate.id === item.id);
+      if (!currentItem || currentItem.media_type !== targetMediaType) {
+        return items;
+      }
+
+      return [
+        { ...currentItem, status: targetStatus },
+        ...items.filter((candidate) => candidate.id !== item.id),
+      ];
+    });
+
+    try {
+      const updated = await updateShelfItem(item.id, { status: targetStatus });
+      setMediaItems((items) => [
+        updated,
+        ...items.filter((candidate) => candidate.id !== item.id),
+      ]);
+    } catch (err) {
+      setMediaItems((items) => {
+        const currentItem = items.find((candidate) => candidate.id === item.id);
+        if (!currentItem) {
+          return items;
+        }
+
+        return [
+          { ...currentItem, status: originalStatus },
+          ...items.filter((candidate) => candidate.id !== item.id),
+        ];
+      });
+      setError(`Could not move “${item.title}”. ${err.message}`);
+    } finally {
+      setMovingItemIds((ids) => {
+        const nextIds = new Set(ids);
+        nextIds.delete(item.id);
+        return nextIds;
+      });
+    }
+  };
+
+  const isValidDropTarget = (mediaType, status) =>
+    draggedItem?.media_type === mediaType && draggedItem.status !== status;
+
+  const handleDragStart = (event, item) => {
+    if (event.target.closest("button, select")) {
+      event.preventDefault();
+      return;
+    }
+
+    suppressCardClick.current = true;
+    setError("");
+    setDraggedItem(item);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData(
+      "application/x-mediavault-shelf-item",
+      JSON.stringify({ id: item.id, mediaType: item.media_type })
+    );
+  };
+
+  const handleDragOver = (event, mediaType, status) => {
+    if (!isValidDropTarget(mediaType, status)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setActiveDropTarget(`${mediaType}-${status}`);
+  };
+
+  const handleDragLeave = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setActiveDropTarget("");
+    }
+  };
+
+  const releaseCardClickGuard = () => {
+    window.setTimeout(() => {
+      suppressCardClick.current = false;
+    }, 100);
+  };
+
+  const handleDrop = (event, mediaType, status) => {
+    event.preventDefault();
+    setActiveDropTarget("");
+
+    if (draggedItem && isValidDropTarget(mediaType, status)) {
+      moveItem(draggedItem, mediaType, status);
+    }
+
+    setDraggedItem(null);
+    releaseCardClickGuard();
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setActiveDropTarget("");
+    releaseCardClickGuard();
   };
 
   const removeItem = async (id) => {
@@ -136,7 +255,11 @@ const Shelf = () => {
 
   return (
     <div className="shelf-dashboard">
-      {error && <div className="shelf-error">{error}</div>}
+      {error && (
+        <div className="shelf-error" role="alert">
+          {error}
+        </div>
+      )}
 
       <div className="shelf-columns-container">
         {columns.map((column) => (
@@ -153,8 +276,9 @@ const Shelf = () => {
               const sectionKey = `${column.mediaType}-${statusGroup.value}`;
               const isCollapsed = collapsedMap[sectionKey] || false;
 
-              const currentPage = currentPageMap[sectionKey] || 1;
               const totalPages = Math.ceil(allItems.length / ITEMS_PER_PAGE);
+              const requestedPage = currentPageMap[sectionKey] || 1;
+              const currentPage = Math.min(requestedPage, Math.max(totalPages, 1));
 
               const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
               const paginatedItems = allItems.slice(
@@ -163,7 +287,23 @@ const Shelf = () => {
               );
 
               return (
-                <div key={statusGroup.value} className="status-box">
+                <div
+                  key={statusGroup.value}
+                  className={`status-box${
+                    isValidDropTarget(column.mediaType, statusGroup.value)
+                      ? " valid-drop-target"
+                      : ""
+                  }${
+                    activeDropTarget === sectionKey ? " active-drop-target" : ""
+                  }`}
+                  onDragOver={(event) =>
+                    handleDragOver(event, column.mediaType, statusGroup.value)
+                  }
+                  onDragLeave={handleDragLeave}
+                  onDrop={(event) =>
+                    handleDrop(event, column.mediaType, statusGroup.value)
+                  }
+                >
                   {/* Clickable Header Dropdown Toggle */}
                   <div
                     className="status-header"
@@ -187,12 +327,23 @@ const Shelf = () => {
                           paginatedItems.map((item) => (
                             <div
                               key={item.id}
-                              className="mini-item-card"
+                              className={`mini-item-card${
+                                draggedItem?.id === item.id ? " is-dragging" : ""
+                              }`}
                               role="link"
                               tabIndex={0}
+                              draggable={!movingItemIds.has(item.id)}
                               aria-label={`View saved details for ${item.title}`}
-                              onClick={() => openShelfItem(item.id)}
+                              onClick={(event) => {
+                                if (suppressCardClick.current) {
+                                  event.preventDefault();
+                                  return;
+                                }
+                                openShelfItem(item.id);
+                              }}
                               onKeyDown={(event) => handleCardKeyDown(event, item.id)}
+                              onDragStart={(event) => handleDragStart(event, item)}
+                              onDragEnd={handleDragEnd}
                             >
                               <div className="mini-item-main">
                                 {item.cover_url && (
@@ -220,6 +371,25 @@ const Shelf = () => {
                                       updateItem(item.id, { rating })
                                     }
                                   />
+                                  <select
+                                    className="mini-status-select"
+                                    value={item.status}
+                                    disabled={movingItemIds.has(item.id)}
+                                    aria-label={`Move ${item.title} to another status`}
+                                    onChange={(event) =>
+                                      moveItem(
+                                        item,
+                                        column.mediaType,
+                                        event.target.value
+                                      )
+                                    }
+                                  >
+                                    {column.statuses.map((status) => (
+                                      <option key={status.value} value={status.value}>
+                                        {status.label}
+                                      </option>
+                                    ))}
+                                  </select>
                                 </div>
                                 <button
                                   type="button"
