@@ -9,6 +9,7 @@ import {
   getShelf,
   updateShelfItem,
 } from "../services/mediaShelfApi";
+import { useBreadcrumb } from "../context/BreadcrumbContext";
 import "./MovieDetails.css";
 
 const getReleaseYear = (releaseDate) => {
@@ -19,6 +20,7 @@ const getReleaseYear = (releaseDate) => {
 
 const MovieDetails = () => {
   const { id } = useParams();
+  const { setBreadcrumbTitle } = useBreadcrumb();
   const [movie, setMovie] = useState(null);
   const [shelfItem, setShelfItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,8 @@ const MovieDetails = () => {
         ]);
 
         setMovie(movieData);
+        // Set breadcrumb title dynamically for global layout
+        setBreadcrumbTitle(movieData.title);
 
         const existingItem = shelf.find(
           (item) =>
@@ -56,7 +60,10 @@ const MovieDetails = () => {
     };
 
     fetchDetails();
-  }, [id]);
+
+    // Reset breadcrumb title when navigating away
+    return () => setBreadcrumbTitle("");
+  }, [id, setBreadcrumbTitle]);
 
   const buildMoviePayload = () => {
     const posterUrl = movie.poster_path

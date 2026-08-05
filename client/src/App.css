@@ -56,4 +56,5 @@
   cursor: pointer;
   outline: none;
   transition: transform 0.1s ease, background-color 0.2s ease;
+  padding: 1rem;
 }
