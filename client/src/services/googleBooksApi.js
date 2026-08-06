@@ -37,7 +37,7 @@ const formatBookItem = (item) => {
     : "https://via.placeholder.com/128x192?text=No+Cover";
 
   return {
-    id: item.lending_edition_s,
+    id: item.id,
     title: volumeInfo.title || "Untitled",
     authors: volumeInfo.authors || ["Unknown Author"],
     description: volumeInfo.description || "No description available.",
