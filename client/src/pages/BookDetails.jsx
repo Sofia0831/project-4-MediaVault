@@ -174,12 +174,6 @@ const BookDetails = () => {
           <h2>{book.title}</h2>
           <p className="movie-tagline">By {authorsText}</p>
 
-          <p className="movie-meta">
-            <strong>Published:</strong> {book.publishedDate || "N/A"} |{" "}
-            <strong>Publisher:</strong> {book.publisher || "N/A"} |{" "}
-            <strong>Pages:</strong> {book.pageCount ? `${book.pageCount} pgs` : "N/A"}
-          </p>
-
           {book.categories && book.categories.length > 0 && (
             <div className="genre-container">
               {book.categories.map((category) => (

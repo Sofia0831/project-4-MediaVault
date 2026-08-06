@@ -20,6 +20,12 @@ openLibraryService.getBook = (workId) =>
     `${BASE}/works/${workId}.json`
   );
 
+
+openLibraryService.getAuthor = (authorId) =>
+  apiClient(
+    `${BASE}/authors/${authorId}.json`
+  );
+
 /* *****************************
  * Popular Books
  * ***************************** */
@@ -29,6 +35,7 @@ openLibraryService.getPopularBooks = (page = 1, limit = 20) => {
     `${BASE}/search.json?q=bestseller&limit=${limit}&offset=${offset}`
   );
 };
+
 
 /* *****************************
  * Recommendations

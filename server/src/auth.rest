@@ -155,7 +155,11 @@ GET {{baseUrl}}/api/media/books/recommendations
 ###
 
 ### Book Details
-GET {{baseUrl}}/api/media/books/OL47138177M
+GET {{baseUrl}}/api/media/books/OL9743254M
+
+
+###
+GET {{baseUrl}}/api/media/books/authors/OL22019A
 
 ###########################################################
 # GLOBAL MEDIA SEARCH
