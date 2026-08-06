@@ -11,6 +11,10 @@
   box-sizing: border-box;
 }
 
+.mobile-shelf-navigation {
+  display: none;
+}
+
 .shelf-columns-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -155,6 +159,10 @@
   flex-shrink: 0;
 }
 
+.mini-item-cover-placeholder {
+  display: none;
+}
+
 .mini-item-copy {
   display: flex;
   flex-direction: column;
@@ -293,20 +301,205 @@
 
 
 @media (max-width: 768px) {
+  .mobile-shelf-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0;
+  }
+
+  .mobile-media-tabs,
+  .mobile-status-tabs {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .mobile-media-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-status-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mobile-media-tabs button,
+  .mobile-status-tabs button {
+    align-items: center;
+    background-color: #292929;
+    border: 1px solid #555555;
+    border-radius: 6px;
+    color: #dddddd;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-weight: 700;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0.5rem;
+  }
+
+  .mobile-status-tabs button {
+    flex-direction: column;
+    font-size: 0.82rem;
+    gap: 0.25rem;
+    line-height: 1.15;
+    min-height: 58px;
+  }
+
+  .mobile-media-tabs button.active,
+  .mobile-status-tabs button.active {
+    background-color: #e59d42;
+    border-color: #f4bd67;
+    color: #1a1a1a;
+  }
+
+  .mobile-media-tabs button:focus-visible,
+  .mobile-status-tabs button:focus-visible {
+    outline: 3px solid #f4bd67;
+    outline-offset: 2px;
+  }
+
+  .mobile-tab-count {
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 0.75rem;
+    justify-content: center;
+    min-height: 1.35rem;
+    min-width: 1.35rem;
+    padding: 0 0.35rem;
+  }
+
   .shelf-columns-container {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin: 1rem auto;
-    padding: 0 1.5rem;
+    display: block;
+    margin: 0.75rem auto 1rem;
+    padding: 0 1rem;
   }
 
-  .category-banner-btn {
-    font-size: 1.25rem;
-    padding: 0.85rem;
+  .shelf-column {
+    display: none;
   }
 
-  .status-header {
-    font-size: 1.05rem;
+  .shelf-column.mobile-selected {
+    display: block;
+  }
+
+  .category-banner-btn,
+  .status-header,
+  .status-box:not(.mobile-selected) {
+    display: none;
+  }
+
+  .status-box.mobile-selected {
+    background-color: transparent;
+    border: none;
+    min-height: 0;
+  }
+
+  .status-content {
+    gap: 0.75rem;
+    padding: 0;
+  }
+
+  .placeholder-text {
+    background-color: #242424;
+    border: 1px solid #444444;
+    border-radius: 6px;
+    margin: 0;
+    min-height: 7rem;
+    padding: 2.5rem 1rem;
+  }
+
+  .mini-item-card {
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+
+  .mini-item-card:hover {
+    transform: none;
+  }
+
+  .mini-item-main {
+    align-items: start;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-areas:
+      "cover copy remove"
+      "controls controls controls";
+    grid-template-columns: 56px minmax(0, 1fr) 44px;
+  }
+
+  .mini-item-cover {
+    grid-area: cover;
+    height: 84px;
+    width: 56px;
+  }
+
+  .mini-item-cover-placeholder {
+    align-items: center;
+    background-color: #252525;
+    color: #999999;
+    display: flex;
+    font-size: 0.65rem;
+    justify-content: center;
+    line-height: 1.15;
+    padding: 0.25rem;
+    text-align: center;
+  }
+
+  .mini-item-copy {
+    gap: 0.3rem;
+    grid-area: copy;
+    padding: 0;
+  }
+
+  .mini-item-copy strong {
+    font-size: 1rem;
+    white-space: normal;
+  }
+
+  .mini-item-controls {
+    align-items: stretch;
+    border-top: 1px solid #444444;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    grid-area: controls;
+    margin: 0;
+    padding-top: 0.65rem;
+    width: 100%;
+  }
+
+  .rating-control {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .star-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mini-status-select {
+    min-height: 44px;
+    max-width: none;
+    width: 100%;
+  }
+
+  .mini-delete-btn {
+    align-items: center;
+    display: flex;
+    grid-area: remove;
+    height: 44px;
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
+  }
+
+  .page-btn {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -314,40 +507,34 @@
 @media (max-width: 480px) {
   .shelf-columns-container {
     padding: 0 0.5rem;
-    margin: 0.5rem auto;
   }
 
-  .status-content {
-    padding: 0.6rem;
+  .mobile-shelf-navigation {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .mobile-media-tabs,
+  .mobile-status-tabs {
+    gap: 0.3rem;
+  }
+
+  .mobile-status-tabs button {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
   }
 
   .mini-item-main {
-    flex-wrap: wrap;
-    position: relative;
-    align-items: flex-start;
+    gap: 0.6rem;
+    grid-template-columns: 52px minmax(0, 1fr) 44px;
   }
 
   .mini-item-cover {
-    width: 40px;
-    height: 60px;
+    height: 78px;
+    width: 52px;
   }
 
-  .mini-item-copy {
-    padding-right: 2rem; 
-  }
-
-  .mini-item-controls {
-    width: 100%;
-    justify-content: flex-start;
-    padding-top: 0.4rem;
-    border-top: 1px stroke #444444;
-  }
-
-  /* Position delete button at top right of card on mobile */
-  .mini-delete-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.25rem 0.5rem;
+  .star-button {
+    font-size: 1.5rem;
   }
 }
