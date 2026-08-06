@@ -120,7 +120,6 @@ export const getBookDetails = async (bookId) => {
     }
 
     const item = await response.json();
-    console.log(item);
 
     return formatBookItem(item);
   } catch (error) {
