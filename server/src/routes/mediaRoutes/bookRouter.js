@@ -11,4 +11,6 @@ router.get("/recommendations", bookController.getRecommendations);
 
 router.get("/:id", bookController.getBook);
 
+router.get("/authors/:id", bookController.getAuthor);
+
 export default router;

@@ -14,13 +14,10 @@ const formatBookItem = (item) => {
         : item.description;
 
     return {
-      id: String(item.key || item.id || "").replace("/works/", ""),
+      id: String(item.lending_edition_s || item.key || "").replace("/works/", ""),
       title: item.title || "Untitled",
       authors: item.author_name || ["Unknown Author"],
-      publisher: item.publisher?.[0] || "Unknown Publisher",
-      publishedDate: item.first_publish_year || item.first_publish_date || "N/A",
       description: description || "No description available.",
-      pageCount: item.number_of_pages_median || item.number_of_pages || 0,
       categories: item.subject || item.subjects || [],
       averageRating: null,
       ratingsCount: 0,
@@ -40,13 +37,10 @@ const formatBookItem = (item) => {
     : "https://via.placeholder.com/128x192?text=No+Cover";
 
   return {
-    id: item.id,
+    id: item.lending_edition_s,
     title: volumeInfo.title || "Untitled",
     authors: volumeInfo.authors || ["Unknown Author"],
-    publisher: volumeInfo.publisher || "Unknown Publisher",
-    publishedDate: volumeInfo.publishedDate || "N/A",
     description: volumeInfo.description || "No description available.",
-    pageCount: volumeInfo.pageCount || 0,
     categories: volumeInfo.categories || [],
     averageRating: volumeInfo.averageRating || null,
     ratingsCount: volumeInfo.ratingsCount || 0,
@@ -120,9 +114,54 @@ export const getBookDetails = async (bookId) => {
     const response = await fetch(`${BASE_URL}/${bookId}`, {
       credentials: "include",
     });
-    if (!response.ok) throw new Error("Failed to fetch book details");
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch book details");
+    }
 
     const item = await response.json();
+
+    // Fetch author names
+    const authorRefs =
+      item.authors?.map((author) => author.key || author.author?.key) ||
+      item.author_key?.map((key) => `/authors/${key}`) ||
+      [];
+
+    if (authorRefs.length > 0) {
+      const authorNames = await Promise.all(
+        authorRefs.map(async (authorPath) => {
+          try {
+            const response = await fetch(`${BASE_URL}${authorPath}`, {
+              credentials: "include",
+            });
+
+            if (!response.ok) return null;
+
+            const author = await response.json();
+            return author.name;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      item.author_name = authorNames.filter(Boolean);
+    }
+
+    // Fetch work description
+    if (item.works?.length) {
+      const workPath = item.works[0].key.replace("/works", "");
+
+      const response2 = await fetch(`${BASE_URL}${workPath}`, {
+        credentials: "include",
+      });
+
+      if (response2.ok) {
+        const work = await response2.json();
+        item.description = work.description;
+      }
+    }
+
     return formatBookItem(item);
   } catch (error) {
     console.error("Books Fetch Details Error:", error);

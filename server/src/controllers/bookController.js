@@ -51,6 +51,27 @@ bookController.getBook = async (req, res) => {
 };
 
 /* *****************************
+ * Book Details
+ * ***************************** */
+bookController.getAuthor = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const author = await openLibraryService.getAuthor(id);
+
+    return res.status(200).json(author);
+
+  } catch (error) {
+
+    return res.status(500).json({
+      message: error.message,
+    });
+
+  }
+};
+
+/* *****************************
  * Recommendations
  * ***************************** */
 bookController.getRecommendations = async (req, res) => {
