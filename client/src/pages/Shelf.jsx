@@ -10,6 +10,11 @@ import "./Shelf.css";
 
 const ITEMS_PER_PAGE = 5;
 const VALID_STATUSES = new Set(["plan", "in_progress", "completed"]);
+const MOBILE_STATUS_LABELS = {
+  plan: "Planned",
+  in_progress: "In Progress",
+  completed: "Completed",
+};
 
 const columns = [
   {
@@ -45,6 +50,11 @@ const Shelf = () => {
   const [draggedItem, setDraggedItem] = useState(null);
   const [activeDropTarget, setActiveDropTarget] = useState("");
   const [movingItemIds, setMovingItemIds] = useState(() => new Set());
+  const [mobileMediaType, setMobileMediaType] = useState("movie");
+  const [mobileStatus, setMobileStatus] = useState("plan");
+  const [dragDisabled, setDragDisabled] = useState(() =>
+    window.matchMedia("(max-width: 768px), (pointer: coarse)").matches
+  );
   const suppressCardClick = useRef(false);
 
   useEffect(() => {
@@ -61,6 +71,17 @@ const Shelf = () => {
     };
 
     loadShelf();
+  }, []);
+
+  useEffect(() => {
+    const dragMediaQuery = window.matchMedia(
+      "(max-width: 768px), (pointer: coarse)"
+    );
+    const handleDragMediaChange = (event) => setDragDisabled(event.matches);
+
+    dragMediaQuery.addEventListener("change", handleDragMediaChange);
+    return () =>
+      dragMediaQuery.removeEventListener("change", handleDragMediaChange);
   }, []);
 
   const getItems = (type, status) =>
@@ -113,7 +134,7 @@ const Shelf = () => {
       item.status === targetStatus ||
       !VALID_STATUSES.has(targetStatus)
     ) {
-      return;
+      return false;
     }
 
     const originalStatus = item.status;
@@ -145,6 +166,7 @@ const Shelf = () => {
         updated,
         ...items.filter((candidate) => candidate.id !== item.id),
       ]);
+      return true;
     } catch (err) {
       setMediaItems((items) => {
         const currentItem = items.find((candidate) => candidate.id === item.id);
@@ -158,12 +180,23 @@ const Shelf = () => {
         ];
       });
       setError(`Could not move “${item.title}”. ${err.message}`);
+      return false;
     } finally {
       setMovingItemIds((ids) => {
         const nextIds = new Set(ids);
         nextIds.delete(item.id);
         return nextIds;
       });
+    }
+  };
+
+  const handleStatusChange = async (item, mediaType, targetStatus) => {
+    const originalStatus = item.status;
+    setMobileStatus(targetStatus);
+
+    const moved = await moveItem(item, mediaType, targetStatus);
+    if (!moved) {
+      setMobileStatus(originalStatus);
     }
   };
 
@@ -261,9 +294,51 @@ const Shelf = () => {
         </div>
       )}
 
+      <div className="mobile-shelf-navigation">
+        <div className="mobile-media-tabs" role="tablist" aria-label="Media type">
+          {columns.map((column) => (
+            <button
+              key={column.mediaType}
+              type="button"
+              role="tab"
+              aria-selected={mobileMediaType === column.mediaType}
+              className={mobileMediaType === column.mediaType ? "active" : ""}
+              onClick={() => setMobileMediaType(column.mediaType)}
+            >
+              {column.mediaType === "movie" ? "Movies" : "Books"}
+            </button>
+          ))}
+        </div>
+
+        <div className="mobile-status-tabs" role="tablist" aria-label="Shelf status">
+          {columns[0].statuses.map((status) => {
+            const itemCount = getItems(mobileMediaType, status.value).length;
+
+            return (
+              <button
+                key={status.value}
+                type="button"
+                role="tab"
+                aria-selected={mobileStatus === status.value}
+                className={mobileStatus === status.value ? "active" : ""}
+                onClick={() => setMobileStatus(status.value)}
+              >
+                <span>{MOBILE_STATUS_LABELS[status.value]}</span>
+                <span className="mobile-tab-count">{itemCount}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="shelf-columns-container">
         {columns.map((column) => (
-          <div key={column.mediaType} className="shelf-column">
+          <div
+            key={column.mediaType}
+            className={`shelf-column${
+              mobileMediaType === column.mediaType ? " mobile-selected" : ""
+            }`}
+          >
             <button
               className="category-banner-btn"
               onClick={() => navigate(column.cataloguePath)}
@@ -295,6 +370,8 @@ const Shelf = () => {
                       : ""
                   }${
                     activeDropTarget === sectionKey ? " active-drop-target" : ""
+                  }${
+                    mobileStatus === statusGroup.value ? " mobile-selected" : ""
                   }`}
                   onDragOver={(event) =>
                     handleDragOver(event, column.mediaType, statusGroup.value)
@@ -332,7 +409,9 @@ const Shelf = () => {
                               }`}
                               role="link"
                               tabIndex={0}
-                              draggable={!movingItemIds.has(item.id)}
+                              draggable={
+                                !dragDisabled && !movingItemIds.has(item.id)
+                              }
                               aria-label={`View saved details for ${item.title}`}
                               onClick={(event) => {
                                 if (suppressCardClick.current) {
@@ -352,6 +431,14 @@ const Shelf = () => {
                                     alt={item.title}
                                     className="mini-item-cover"
                                   />
+                                )}
+                                {!item.cover_url && (
+                                  <div
+                                    className="mini-item-cover mini-item-cover-placeholder"
+                                    aria-hidden="true"
+                                  >
+                                    No cover
+                                  </div>
                                 )}
                                 <div className="mini-item-copy">
                                   <strong>{item.title}</strong>
@@ -377,7 +464,7 @@ const Shelf = () => {
                                     disabled={movingItemIds.has(item.id)}
                                     aria-label={`Move ${item.title} to another status`}
                                     onChange={(event) =>
-                                      moveItem(
+                                      handleStatusChange(
                                         item,
                                         column.mediaType,
                                         event.target.value
