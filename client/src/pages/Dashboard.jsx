@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getShelf } from "../services/mediaShelfApi";
+import BookCover from "../components/BookCover";
+import { normalizeBookCoverUrl } from "../utils/bookCovers";
+import { getResponsiveTmdbPoster } from "../services/tmdbApi";
 import "./Dashboard.css";
 
 const statusLabels = {
@@ -9,7 +12,7 @@ const statusLabels = {
   completed: "Completed",
 };
 
-const AUTO_ADVANCE_MS = 2000;
+const AUTO_ADVANCE_MS = 7000;
 
 const Dashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -19,13 +22,26 @@ const Dashboard = ({ user }) => {
   const [error, setError] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
+  const [priorityCoverId, setPriorityCoverId] = useState(null);
 
   useEffect(() => {
     const loadSavedMedia = async () => {
       try {
         setError("");
         const shelf = await getShelf();
-        setItems(Array.isArray(shelf) ? shelf : []);
+        const shelfItems = Array.isArray(shelf) ? shelf : [];
+        const initialCoverIndex = shelfItems.findIndex((item) => {
+          if (item.media_type === "book") {
+            return Boolean(normalizeBookCoverUrl(item.cover_url));
+          }
+          return typeof item.cover_url === "string" && item.cover_url.trim();
+        });
+
+        setItems(shelfItems);
+        if (initialCoverIndex >= 0) {
+          setActiveIndex(initialCoverIndex);
+          setPriorityCoverId(shelfItems[initialCoverIndex].id);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -57,6 +73,15 @@ const Dashboard = ({ user }) => {
   };
 
   const activeItem = items[activeIndex];
+  const activeCoverUrl = activeItem?.media_type === "book"
+    ? normalizeBookCoverUrl(activeItem.cover_url)
+    : activeItem?.cover_url?.trim() || null;
+  const isPriorityCover = Boolean(
+    activeCoverUrl && activeItem?.id === priorityCoverId
+  );
+  const responsiveMovieCover = activeItem?.media_type === "movie"
+    ? getResponsiveTmdbPoster(activeCoverUrl)
+    : null;
   const displayName = user?.username || "there";
 
   // Helper to filter, sort by highest rating, and slice the top 10
@@ -137,10 +162,32 @@ const Dashboard = ({ user }) => {
                 aria-label={`View saved details for ${activeItem.title}`}
               >
                 <div className="carousel-cover-wrap">
-                  {activeItem.cover_url ? (
-                    <img src={activeItem.cover_url} alt="" className="carousel-cover" />
+                  {activeItem.media_type === "book" ? (
+                    <BookCover
+                      src={activeItem.cover_url}
+                      alt=""
+                      className="carousel-cover"
+                      width="240"
+                      height="360"
+                      loading={isPriorityCover ? "eager" : "lazy"}
+                      fetchPriority={isPriorityCover ? "high" : "auto"}
+                    />
+                  ) : activeCoverUrl ? (
+                    <img
+                      src={responsiveMovieCover?.src || activeCoverUrl}
+                      srcSet={responsiveMovieCover?.srcSet}
+                      sizes={responsiveMovieCover?.sizes}
+                      alt=""
+                      className="carousel-cover"
+                      width="240"
+                      height="360"
+                      loading={isPriorityCover ? "eager" : "lazy"}
+                      fetchPriority={isPriorityCover ? "high" : "auto"}
+                    />
                   ) : (
-                    <div className="carousel-cover-placeholder" aria-hidden="true">MV</div>
+                    <div className="carousel-cover-placeholder" role="img" aria-label="No cover available">
+                      No cover available
+                    </div>
                   )}
                 </div>
                 <div className="carousel-copy">

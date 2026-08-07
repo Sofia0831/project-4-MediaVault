@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StarRating from "../components/StarRating";
+import BookCover from "../components/BookCover";
 import {
   deleteShelfItem,
   getShelf,
@@ -425,19 +426,32 @@ const Shelf = () => {
                               onDragEnd={handleDragEnd}
                             >
                               <div className="mini-item-main">
-                                {item.cover_url && (
+                                {item.media_type === "book" && (
+                                  <BookCover
+                                    src={item.cover_url}
+                                    alt={`${item.title} cover`}
+                                    className="mini-item-cover"
+                                    width="80"
+                                    height="120"
+                                    loading="lazy"
+                                  />
+                                )}
+                                {item.media_type !== "book" && item.cover_url && (
                                   <img
                                     src={item.cover_url}
                                     alt={item.title}
                                     className="mini-item-cover"
+                                    width="80"
+                                    height="120"
+                                    loading="lazy"
                                   />
                                 )}
-                                {!item.cover_url && (
+                                {item.media_type !== "book" && !item.cover_url && (
                                   <div
                                     className="mini-item-cover mini-item-cover-placeholder"
                                     aria-hidden="true"
                                   >
-                                    No cover
+                                    No cover available
                                   </div>
                                 )}
                                 <div className="mini-item-copy">

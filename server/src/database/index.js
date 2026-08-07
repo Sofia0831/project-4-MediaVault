@@ -12,6 +12,11 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false, // Required for Supabase
   },
+  // Keep the connection established during startup available for the first
+  // authenticated shelf request instead of paying the remote TLS/database
+  // handshake after the pool's default idle timeout.
+  min: 1,
+  keepAlive: true,
 });
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { API_BASE_URL } from "../services/apiConfig";
@@ -43,17 +43,24 @@ const RegisterPage = () => {
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed.");
+        const message = response.status >= 500
+          ? "Registration is temporarily unavailable. Please try again."
+          : data.message || "We couldn’t create your account. Check your details and try again.";
+        throw new Error(message);
       }
 
       login(data);
 
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(
+        err instanceof TypeError
+          ? "Unable to reach MediaVault. Check your connection and try again."
+          : err.message
+      );
     } finally {
       setLoading(false);
     }
@@ -65,13 +72,14 @@ const RegisterPage = () => {
         <p className="auth-eyebrow">MediaVault</p>
         <h2>Create Account</h2>
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && <p className="auth-error" role="alert">{error}</p>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Username</label>
+            <label htmlFor="register-username">Username</label>
             <input
               type="text"
+              id="register-username"
               name="username"
               placeholder="Choose a username"
               value={formData.username}
@@ -81,9 +89,10 @@ const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label>Email Address</label>
+            <label htmlFor="register-email">Email Address</label>
             <input
               type="email"
+              id="register-email"
               name="email"
               placeholder="Enter your email"
               value={formData.email}
@@ -93,9 +102,10 @@ const RegisterPage = () => {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="register-password">Password</label>
             <input
               type="password"
+              id="register-password"
               name="password"
               placeholder="Enter your password"
               value={formData.password}

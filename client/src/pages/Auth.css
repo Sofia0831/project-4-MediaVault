@@ -58,7 +58,7 @@
 
 .form-group input {
   background: #1e1e1e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #777;
   border-radius: 8px;
   padding: 12px;
   color: #fff;
@@ -69,6 +69,8 @@
 
 .form-group input:focus {
   border-color: #e5b80b;
+  outline: 2px solid #e5b80b;
+  outline-offset: 2px;
 }
 
 .auth-submit-btn {
@@ -103,4 +105,18 @@
   text-decoration: underline;
   padding: 0;
   display: inline-block;
+}
+
+.auth-toggle-btn:visited {
+  color: #e8b84a;
+}
+
+.auth-toggle-btn:hover {
+  color: #ffe082;
+}
+
+.auth-toggle-btn:focus-visible,
+.auth-submit-btn:focus-visible {
+  outline: 3px solid #f7cb15;
+  outline-offset: 3px;
 }

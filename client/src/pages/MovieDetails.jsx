@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
@@ -41,7 +41,7 @@ const MovieDetails = () => {
 
         setMovie(movieData);
         // Set breadcrumb title dynamically for global layout
-        setBreadcrumbTitle(movieData.title);
+        if (movieData?.title) setBreadcrumbTitle(movieData.title);
 
         const existingItem = shelf.find(
           (item) =>
@@ -91,7 +91,7 @@ const MovieDetails = () => {
       setShelfItem(added);
       setReviewInput(added.review || "");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Unable to load movie details. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -109,9 +109,11 @@ const MovieDetails = () => {
       const updated = await updateShelfItem(shelfItem.id, updates);
       setShelfItem(updated);
       setReviewInput(updated.review || "");
+      return true;
     } catch (err) {
       setShelfItem(previousItem);
       setError(err.message);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -119,14 +121,16 @@ const MovieDetails = () => {
 
   const handleSaveReview = async (event) => {
     event.preventDefault();
-    await updateCurrentShelfItem({ review: reviewInput.trim() || null });
-    setIsEditingReview(false);
+    const saved = await updateCurrentShelfItem({ review: reviewInput.trim() || null });
+    if (saved) setIsEditingReview(false);
   };
 
   const handleDeleteReview = async () => {
-    await updateCurrentShelfItem({ review: null });
-    setReviewInput("");
-    setIsEditingReview(false);
+    const deleted = await updateCurrentShelfItem({ review: null });
+    if (deleted) {
+      setReviewInput("");
+      setIsEditingReview(false);
+    }
   };
 
   const handleRemoveFromShelf = async () => {
@@ -151,7 +155,7 @@ const MovieDetails = () => {
   };
 
   if (loading) return <div className="loading-state">Loading details...</div>;
-  if (!movie) return <div className="loading-state">Movie not found.</div>;
+  if (!movie) return <div className="details-error" role="alert">{error || "Movie not found."}</div>;
 
   const posterUrl = movie.poster_path
     ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
@@ -170,7 +174,7 @@ const MovieDetails = () => {
 
   return (
     <div className="movie-details-container">
-      {error && <div className="details-error">{error}</div>}
+      {error && <div className="details-error" role="alert">{error}</div>}
 
       {backdropUrl && (
         <div
@@ -181,7 +185,14 @@ const MovieDetails = () => {
 
       <div className="details-header-card">
         <div className="poster-container">
-          <img src={posterUrl} alt={movie.title} className="details-poster" />
+          <img
+            src={posterUrl}
+            alt={`${movie.title} poster`}
+            className="details-poster"
+            width="500"
+            height="750"
+            fetchPriority="high"
+          />
         </div>
 
         <div className="details-info">

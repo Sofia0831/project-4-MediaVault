@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
+import BookCover from "../components/BookCover";
 import { useBreadcrumb } from "../context/BreadcrumbContext";
 import {
   deleteShelfItem,
@@ -59,9 +60,11 @@ const SavedMediaDetails = () => {
     try {
       const updated = await updateShelfItem(item.id, updates);
       setItem(updated);
+      return true;
     } catch (err) {
       setItem(previousItem);
       setError(err.message);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -69,8 +72,8 @@ const SavedMediaDetails = () => {
 
   const saveReview = async (event) => {
     event.preventDefault();
-    await updateItem({ review: review.trim() || null });
-    setEditingReview(false);
+    const saved = await updateItem({ review: review.trim() || null });
+    if (saved) setEditingReview(false);
   };
 
   const deleteReview = async () => {
@@ -137,7 +140,19 @@ const SavedMediaDetails = () => {
       {error && <div className="details-error" role="alert">{error}</div>}
 
       <div className="details-header-card">
-        {item.cover_url && (
+        {item.media_type === "book" && (
+          <div className="poster-container book-poster-container">
+            <BookCover
+              src={item.cover_url}
+              alt={`${item.title} cover`}
+              className="details-poster"
+              width="500"
+              height="750"
+              fetchPriority="high"
+            />
+          </div>
+        )}
+        {item.media_type !== "book" && item.cover_url && (
           <div className="poster-container">
             <img src={item.cover_url} alt={`${item.title} cover`} className="details-poster" />
           </div>

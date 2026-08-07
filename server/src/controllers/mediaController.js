@@ -4,6 +4,8 @@ import jikanService from "../services/jikanService.js";
 import openLibraryService from "../services/openLibraryService.js";
 import mangaDexService from "../services/mangaDexService.js";
 import tmdbService from "../services/tmdbService.js";
+import { validateRating, validateStatus } from "../utils/mediaValidation.js";
+import { normalizeMediaBookCover } from "../utils/bookCovers.js";
 
 const mediaController = {};
 
@@ -31,41 +33,11 @@ mediaController.globalSearch = async (req, res) => {
     } catch (error) {
 
         return res.status(500).json({
-            message: error.message
+            message: "Search is temporarily unavailable. Please try again."
         });
 
     }
 }
-
-/* ******************************
- * Get User Shelf
- * ****************************** */
-
-mediaController.getShelf = async (req, res) => {
-
-    try {
-
-        const user = isLoggedIn(req);
-
-        if (!user) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            });
-        }
-
-        const shelf = await mediaModel.getShelf(user.id);
-
-        res.json(shelf);
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
-};
 
 /* ****************************************
  * Get User Shelf
@@ -79,18 +51,18 @@ mediaController.getShelf = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
         }
 
         const shelf = await mediaModel.getShelf(user.id);
 
-        res.status(200).json(shelf);
+        res.status(200).json(shelf.map(normalizeMediaBookCover));
 
     } catch (error) {
 
         res.status(500).json({
-            message: error.message
+            message: "Unable to load your shelf right now. Please try again."
         });
 
     }
@@ -109,24 +81,24 @@ mediaController.getShelfItem = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
         }
 
-        const item = await mediaModel.getShelfItem(req.params.id);
+        const item = await mediaModel.getShelfItem(req.params.id, user.id);
 
-        if (!item || item.user_id !== user.id) {
+        if (!item) {
             return res.status(404).json({
                 message: "Media not found."
             });
         }
 
-        res.status(200).json(item);
+        res.status(200).json(normalizeMediaBookCover(item));
 
     } catch (error) {
 
         res.status(500).json({
-            message: error.message
+            message: "Unable to load this saved item right now. Please try again."
         });
 
     }
@@ -145,15 +117,22 @@ mediaController.addToShelf = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
+        }
+
+        const mediaPayload = normalizeMediaBookCover(req.body);
+        const statusError = validateStatus(mediaPayload.status);
+        const ratingError = validateRating(mediaPayload.rating);
+        if (statusError || ratingError) {
+            return res.status(400).json({ message: statusError || ratingError });
         }
 
         const existing = await mediaModel.getExistingMedia(
             user.id,
-            req.body.external_id,
-            req.body.media_type,
-            req.body.external_source
+            mediaPayload.external_id,
+            mediaPayload.media_type,
+            mediaPayload.external_source
         );
 
         if (existing) {
@@ -162,14 +141,14 @@ mediaController.addToShelf = async (req, res) => {
             });
         }
 
-        const media = await mediaModel.addToShelf(user.id, req.body);
+        const media = await mediaModel.addToShelf(user.id, mediaPayload);
 
-        res.status(201).json(media);
+        res.status(201).json(normalizeMediaBookCover(media));
 
     } catch (error) {
 
         res.status(500).json({
-            message: error.message
+            message: "Unable to save this item right now. Please try again."
         });
 
     }
@@ -188,13 +167,13 @@ mediaController.updateUserLog = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
         }
 
-        const item = await mediaModel.getShelfItem(req.params.id);
+        const item = await mediaModel.getShelfItem(req.params.id, user.id);
 
-        if (!item || item.user_id !== user.id) {
+        if (!item) {
             return res.status(404).json({
                 message: "Media not found."
             });
@@ -208,14 +187,10 @@ mediaController.updateUserLog = async (req, res) => {
             completed_at
         } = req.body;
         
-        if (
-            rating !== undefined &&
-            rating !== null &&
-            (rating < 1 || rating > 5)
-        ) {
-            return res.status(400).json({
-                message: "Rating must be between 1 and 5."
-            });
+        const statusError = validateStatus(status);
+        const ratingError = validateRating(rating);
+        if (statusError || ratingError) {
+            return res.status(400).json({ message: statusError || ratingError });
         }
 
         if (status == null){
@@ -253,11 +228,11 @@ mediaController.updateUserLog = async (req, res) => {
             });
         }
 
-        res.status(200).json(updated);
+        res.status(200).json(normalizeMediaBookCover(updated));
 
     } catch (error) {
         res.status(500).json({
-            message: error.message
+            message: "Unable to update this saved item right now. Please try again."
         });
 
     }
@@ -276,7 +251,7 @@ mediaController.deleteShelfItem = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
         }
 
@@ -298,7 +273,7 @@ mediaController.deleteShelfItem = async (req, res) => {
     } catch (error) {
 
         res.status(500).json({
-            message: error.message
+            message: "Unable to remove this saved item right now. Please try again."
         });
 
     }
@@ -317,7 +292,7 @@ mediaController.dashboard = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Your session has expired or login is required."
             });
         }
 
@@ -327,14 +302,14 @@ mediaController.dashboard = async (req, res) => {
 
         res.status(200).json({
             stats,
-            recent,
-            inProgress
+            recent: recent.map(normalizeMediaBookCover),
+            inProgress: inProgress.map(normalizeMediaBookCover)
         });
 
     } catch (error) {
 
         res.status(500).json({
-            message: error.message
+            message: "Unable to load the dashboard right now. Please try again."
         });
 
     }

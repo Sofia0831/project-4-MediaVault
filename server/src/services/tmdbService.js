@@ -3,16 +3,38 @@ import apiClient from "../utils/apiClient.js";
 const API_KEY = process.env.TMBD_KEY;
 const BASE = "https://api.themoviedb.org/3";
 
+const normalizeGenreId = (genre) => {
+    if (!genre) return null;
+    if (String(genre).toLowerCase() === "acting") return "28";
+    return String(genre);
+};
+
 const tmdbService = {};
 
-tmdbService.getPopularMovies = (page = 1) =>
-    apiClient(`${BASE}/movie/popular?api_key=${API_KEY}&page=${page}`);
+tmdbService.getPopularMovies = (page = 1, genre) => {
+    const genreId = normalizeGenreId(genre);
+    const path = genreId ? "/discover/movie" : "/movie/popular";
+    const genreParam = genreId ? `&with_genres=${encodeURIComponent(genreId)}` : "";
+    return apiClient(`${BASE}${path}?api_key=${API_KEY}&page=${page}${genreParam}`);
+};
 
 tmdbService.getPopularTV = (page = 1) =>
     apiClient(`${BASE}/tv/popular?api_key=${API_KEY}&page=${page}`);
 
-tmdbService.searchMovies = (query, page = 1) =>
-    apiClient(`${BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`);
+tmdbService.searchMovies = async (query, page = 1, genre) => {
+    const result = await apiClient(
+        `${BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+    );
+    const genreId = normalizeGenreId(genre);
+
+    if (genreId && Array.isArray(result.results)) {
+        result.results = result.results.filter((movie) =>
+            movie.genre_ids?.includes(Number(genreId))
+        );
+    }
+
+    return result;
+};
 
 tmdbService.searchTV = (query, page = 1) =>
     apiClient(`${BASE}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`);

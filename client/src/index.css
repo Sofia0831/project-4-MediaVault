@@ -12,7 +12,7 @@
 
 
   --clr-primary: #e5b80b; /*gold*/
-  --clr-primary-light: #f7cb15 /*hover*/
+  --clr-primary-light: #f7cb15; /* hover */
   --clr-primary-glow: rgba(229, 184, 11, 0.12);
   --clr-primary-border: rgba(229, 184, 11, 0.28);
   --clr-primary-shadow: rgba(229, 184, 11, 0.08);
@@ -54,6 +54,31 @@ body {
   background-color: var(--clr-bg-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a:link {
+  color: #f4c542;
+  text-decoration: underline;
+  text-decoration-thickness: 0.1em;
+  text-underline-offset: 0.18em;
+}
+
+a:visited {
+  color: #e8b84a;
+}
+
+a:hover {
+  color: #ffe082;
+}
+
+a:active {
+  color: #fff0b3;
+}
+
+a:focus-visible {
+  border-radius: 2px;
+  outline: 3px solid #f7cb15;
+  outline-offset: 3px;
 }
 
 #root {
