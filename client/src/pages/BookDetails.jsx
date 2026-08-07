@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import StarRating from "../components/StarRating";
 import StatusDropdown from "../components/StatusDropdown";
+import BookCover from "../components/BookCover";
 import { getBookDetails } from "../services/googleBooksApi";
 import {
   addShelfItem,
@@ -11,6 +12,7 @@ import {
 } from "../services/mediaShelfApi";
 import "./MovieDetails.css";
 import { useBreadcrumb } from "../context/BreadcrumbContext";
+import { normalizeBookCoverUrl } from "../utils/bookCovers";
 
 const getReleaseYear = (publishedDate) => {
   if (!publishedDate) return null;
@@ -74,7 +76,7 @@ const BookDetails = () => {
     external_id: String(book.id),
     title: book.title,
     creator: book.authors?.join(", ") || "Unknown Author",
-    cover_url: book.thumbnail,
+    cover_url: normalizeBookCoverUrl(book.thumbnail),
     release_year: getReleaseYear(book.publishedDate),
     genres: book.categories || [],
     status: "plan",
@@ -106,9 +108,11 @@ const BookDetails = () => {
       const updated = await updateShelfItem(shelfItem.id, updates);
       setShelfItem(updated);
       setReviewInput(updated.review || "");
+      return true;
     } catch (err) {
       setShelfItem(previousItem);
       setError(err.message);
+      return false;
     } finally {
       setSaving(false);
     }
@@ -116,14 +120,16 @@ const BookDetails = () => {
 
   const handleSaveReview = async (event) => {
     event.preventDefault();
-    await updateCurrentShelfItem({ review: reviewInput.trim() || null });
-    setIsEditingReview(false);
+    const saved = await updateCurrentShelfItem({ review: reviewInput.trim() || null });
+    if (saved) setIsEditingReview(false);
   };
 
   const handleDeleteReview = async () => {
-    await updateCurrentShelfItem({ review: null });
-    setReviewInput("");
-    setIsEditingReview(false);
+    const deleted = await updateCurrentShelfItem({ review: null });
+    if (deleted) {
+      setReviewInput("");
+      setIsEditingReview(false);
+    }
   };
 
   const handleRemoveFromShelf = async () => {
@@ -155,7 +161,7 @@ const BookDetails = () => {
   };
 
   if (loading) return <div className="loading-state">Loading details...</div>;
-  if (!book) return <div className="loading-state">Book not found.</div>;
+  if (!book) return <div className="details-error" role="alert">{error || "Book not found."}</div>;
 
   const authorsText = book.authors?.length
     ? book.authors.join(", ")
@@ -163,11 +169,18 @@ const BookDetails = () => {
 
   return (
     <div className="movie-details-container">
-      {error && <div className="details-error">{error}</div>}
+      {error && <div className="details-error" role="alert">{error}</div>}
 
       <div className="details-header-card">
-        <div className="poster-container">
-          <img src={book.thumbnail} alt={book.title} className="details-poster" />
+        <div className="poster-container book-poster-container">
+          <BookCover
+            src={book.thumbnail}
+            alt={`${book.title} cover`}
+            className="details-poster"
+            width="500"
+            height="750"
+            fetchPriority="high"
+          />
         </div>
 
         <div className="details-info">

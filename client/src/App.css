@@ -58,3 +58,16 @@
   transition: transform 0.1s ease, background-color 0.2s ease;
   padding: 1rem;
 }
+
+.route-loading {
+  align-items: center;
+  background: var(--grad-page-bg);
+  color: var(--clr-text-light);
+  display: flex;
+  font-size: 1.25rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: calc(100vh - 88px);
+  padding: 2rem;
+  text-align: center;
+}

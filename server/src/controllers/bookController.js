@@ -8,7 +8,9 @@ const bookController = {};
 bookController.searchBooks = async (req, res) => {
   try {
 
-    const { query } = req.query;
+    const { query, subject } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
 
     if (!query) {
       return res.status(400).json({
@@ -16,14 +18,14 @@ bookController.searchBooks = async (req, res) => {
       });
     }
 
-    const books = await openLibraryService.searchBooks(query);
+    const books = await openLibraryService.searchBooks(query, page, limit, subject);
 
     return res.status(200).json(books);
 
   } catch (error) {
 
     return res.status(500).json({
-      message: error.message,
+      message: "Book search is temporarily unavailable. Please try again.",
     });
 
   }
@@ -44,7 +46,7 @@ bookController.getBook = async (req, res) => {
   } catch (error) {
 
     return res.status(500).json({
-      message: error.message,
+      message: "Book details are temporarily unavailable. Please try again.",
     });
 
   }
@@ -65,7 +67,7 @@ bookController.getAuthor = async (req, res) => {
   } catch (error) {
 
     return res.status(500).json({
-      message: error.message,
+      message: "Author details are temporarily unavailable. Please try again.",
     });
 
   }
@@ -85,7 +87,7 @@ bookController.getRecommendations = async (req, res) => {
   } catch (error) {
 
     return res.status(500).json({
-      message: error.message,
+      message: "Book recommendations are temporarily unavailable. Please try again.",
     });
 
   }
@@ -98,11 +100,14 @@ bookController.getPopularBooks = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
+    const { subject } = req.query;
 
-    const books = await openLibraryService.getPopularBooks(page, limit);
+    const books = await openLibraryService.getPopularBooks(page, limit, subject);
     return res.status(200).json(books);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      message: "Popular books are temporarily unavailable. Please try again.",
+    });
   }
 };
 

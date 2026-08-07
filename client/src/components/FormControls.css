@@ -37,7 +37,7 @@
 
 .status-control select {
   background: var(--clr-surface-inner);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid #777;
   border-radius: 8px;
   color: var(--clr-text-light);
   font-size: 1rem;
@@ -46,7 +46,8 @@
 
 .status-control select:focus {
   border-color: var(--clr-primary);
-  outline: none;
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
 }
 
 .status-control select:disabled {

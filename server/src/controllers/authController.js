@@ -76,7 +76,7 @@ authController.register = async (req, res) => {
     console.error(err);
 
     return res.status(500).json({
-      message: err.message,
+      message: "Registration is temporarily unavailable. Please try again.",
     });
   }
 };
@@ -153,7 +153,7 @@ authController.login = async (req, res) => {
     console.error(err);
 
     return res.status(500).json({
-      message: err.message,
+      message: "Login is temporarily unavailable. Please try again.",
     });
   }
 };

@@ -7,7 +7,19 @@ const mediaModel = {};
  * ********************************* */
 mediaModel.getShelf = async (userId) => {
     const sql = `
-        SELECT *
+        SELECT
+            id,
+            media_type,
+            external_source,
+            external_id,
+            title,
+            creator,
+            cover_url,
+            release_year,
+            genres,
+            status,
+            rating,
+            review
         FROM user_media_logs
         WHERE user_id = $1
         ORDER BY updated_at DESC
@@ -20,14 +32,15 @@ mediaModel.getShelf = async (userId) => {
 /* *********************************
  * Get One Item
  * ********************************* */
-mediaModel.getShelfItem = async (id) => {
+mediaModel.getShelfItem = async (id, userId) => {
     const sql = `
         SELECT *
         FROM user_media_logs
         WHERE id = $1
+          AND user_id = $2
     `;
 
-    const result = await pool.query(sql, [id]);
+    const result = await pool.query(sql, [id, userId]);
     return result.rows[0];
 };
 

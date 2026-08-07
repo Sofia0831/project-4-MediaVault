@@ -1,13 +1,31 @@
 import { API_BASE_URL } from "./apiConfig";
+import {
+  buildOpenLibraryCoverUrl,
+  normalizeBookCoverUrl,
+  normalizeOpenLibraryCoverId,
+} from "../utils/bookCovers";
 
 const BASE_URL = `${API_BASE_URL}/media/books`;
+
+const bookRequest = async (url) => {
+  try {
+    return await fetch(url, { credentials: "include" });
+  } catch (error) {
+    throw new Error(
+      "Unable to reach MediaVault. Check your connection and try again.",
+      { cause: error }
+    );
+  }
+};
 
 /**
  * Normalizes book data so image links use HTTPS and fallbacks exist
  */
 const formatBookItem = (item) => {
   if (!item.volumeInfo) {
-    const coverId = item.cover_i || item.covers?.[0];
+    const coverId = [item.cover_i, item.cover_id, ...(item.covers || [])]
+      .map(normalizeOpenLibraryCoverId)
+      .find(Boolean);
     const description =
       typeof item.description === "object"
         ? item.description.value
@@ -21,20 +39,18 @@ const formatBookItem = (item) => {
       categories: item.subject || item.subjects || [],
       averageRating: null,
       ratingsCount: 0,
-      thumbnail: coverId
-        ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
-        : "https://via.placeholder.com/128x192?text=No+Cover",
+      thumbnail: buildOpenLibraryCoverUrl(coverId),
     };
   }
 
   const volumeInfo = item.volumeInfo || {};
   const imageLinks = volumeInfo.imageLinks || {};
 
-  const thumbnail = imageLinks.thumbnail
+  const thumbnail = normalizeBookCoverUrl(imageLinks.thumbnail
     ? imageLinks.thumbnail.replace("http://", "https://")
     : imageLinks.smallThumbnail
     ? imageLinks.smallThumbnail.replace("http://", "https://")
-    : "https://via.placeholder.com/128x192?text=No+Cover";
+    : null);
 
   return {
     id: item.id,
@@ -51,59 +67,47 @@ const formatBookItem = (item) => {
 /**
  * Popular books for initial load on search page
  */
-export const getPopularBooks = async (page = 1, maxResults = 20) => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/popular?page=${page}&limit=${maxResults}`,
-      { credentials: "include" }
-    );
-    if (!response.ok) throw new Error("Failed to fetch books");
+const parseBooksResponse = async (response, maxResults, fallbackMessage) => {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || fallbackMessage);
+  const items = data.docs || data.items || data.works || [];
 
-    const data = await response.json();
-    const items = data.docs || data.items || data.works || [];
+  return {
+    results: items.map(formatBookItem),
+    totalItems: data.numFound || data.totalItems || items.length,
+    totalPages: Math.max(
+      1,
+      Math.ceil((data.numFound || data.totalItems || items.length) / maxResults)
+    ),
+  };
+};
 
-    return {
-      results: items.map(formatBookItem),
-      totalItems: data.numFound || data.totalItems || items.length,
-      totalPages: Math.max(
-        1,
-        Math.ceil((data.numFound || data.totalItems || items.length) / maxResults)
-      ),
-    };
-  } catch (error) {
-    console.error("Books Fetch Error:", error);
-    return { results: [], totalItems: 0, totalPages: 1 };
-  }
+export const getPopularBooks = async (page = 1, maxResults = 20, subject = "") => {
+  const subjectParam = subject ? `&subject=${encodeURIComponent(subject)}` : "";
+  const response = await bookRequest(
+    `${BASE_URL}/popular?page=${page}&limit=${maxResults}${subjectParam}`
+  );
+  return parseBooksResponse(
+    response,
+    maxResults,
+    "Unable to load books. Please try again."
+  );
 };
 
 /**
  * Search books by query
  */
-export const searchBooks = async (query, page = 1, maxResults = 20) => {
-  if (!query.trim()) return getPopularBooks(page, maxResults);
-
-  try {
-    const response = await fetch(
-      `${BASE_URL}/search?query=${encodeURIComponent(query)}&page=${page}&limit=${maxResults}`,
-      { credentials: "include" }
-    );
-    if (!response.ok) throw new Error("Failed to search books");
-
-    const data = await response.json();
-    const items = data.docs || data.items || data.works || [];
-
-    return {
-      results: items.map(formatBookItem),
-      totalItems: data.numFound || data.totalItems || items.length,
-      totalPages: Math.max(
-        1,
-        Math.ceil((data.numFound || data.totalItems || items.length) / maxResults)
-      ),
-    };
-  } catch (error) {
-    console.error("Books Search Error:", error);
-    return { results: [], totalItems: 0, totalPages: 1 };
-  }
+export const searchBooks = async (query, page = 1, maxResults = 20, subject = "") => {
+  if (!query.trim()) return getPopularBooks(page, maxResults, subject);
+  const subjectParam = subject ? `&subject=${encodeURIComponent(subject)}` : "";
+  const response = await bookRequest(
+    `${BASE_URL}/search?query=${encodeURIComponent(query)}&page=${page}&limit=${maxResults}${subjectParam}`
+  );
+  return parseBooksResponse(
+    response,
+    maxResults,
+    "Unable to search books. Please try again."
+  );
 };
 
 /**
@@ -111,12 +115,11 @@ export const searchBooks = async (query, page = 1, maxResults = 20) => {
  */
 export const getBookDetails = async (bookId) => {
   try {
-    const response = await fetch(`${BASE_URL}/${bookId}`, {
-      credentials: "include",
-    });
+    const response = await bookRequest(`${BASE_URL}/${bookId}`);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch book details");
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || "Unable to load book details. Please try again.");
     }
 
     const item = await response.json();
@@ -131,9 +134,7 @@ export const getBookDetails = async (bookId) => {
       const authorNames = await Promise.all(
         authorRefs.map(async (authorPath) => {
           try {
-            const response = await fetch(`${BASE_URL}${authorPath}`, {
-              credentials: "include",
-            });
+            const response = await bookRequest(`${BASE_URL}${authorPath}`);
 
             if (!response.ok) return null;
 
@@ -152,9 +153,7 @@ export const getBookDetails = async (bookId) => {
     if (item.works?.length) {
       const workPath = item.works[0].key.replace("/works", "");
 
-      const response2 = await fetch(`${BASE_URL}${workPath}`, {
-        credentials: "include",
-      });
+      const response2 = await bookRequest(`${BASE_URL}${workPath}`);
 
       if (response2.ok) {
         const work = await response2.json();
@@ -164,7 +163,12 @@ export const getBookDetails = async (bookId) => {
 
     return formatBookItem(item);
   } catch (error) {
-    console.error("Books Fetch Details Error:", error);
-    return null;
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Unable to reach MediaVault. Check your connection and try again.",
+        { cause: error }
+      );
+    }
+    throw error;
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { API_BASE_URL } from "../services/apiConfig";
@@ -42,17 +42,24 @@ const LoginPage = () => {
         }
       );
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.message || "Login failed.");
+        const message = response.status >= 500
+          ? "Login is temporarily unavailable. Please try again."
+          : data.message || "We couldn’t sign you in. Check your details and try again.";
+        throw new Error(message);
       }
 
       login(data);
 
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(
+        err instanceof TypeError
+          ? "Unable to reach MediaVault. Check your connection and try again."
+          : err.message
+      );
     } finally {
       setLoading(false);
     }
@@ -67,10 +74,11 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Email Address</label>
+            <label htmlFor="login-email">Email Address</label>
 
             <input
               type="email"
+              id="login-email"
               name="email"
               placeholder="Enter your email"
               value={formData.email}
@@ -80,10 +88,11 @@ const LoginPage = () => {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
 
             <input
               type="password"
+              id="login-password"
               name="password"
               placeholder="Enter your password"
               value={formData.password}
@@ -92,7 +101,7 @@ const LoginPage = () => {
             />
           </div>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && <p className="auth-error" role="alert">{error}</p>}
 
           <button
             type="submit"

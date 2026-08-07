@@ -33,7 +33,7 @@
 
 .category-banner-btn {
   background-color: #e59d42;
-  color: #ffffff;
+  color: #111111;
   border: none;
   font-size: 1.5rem;
   font-weight: bold;
@@ -46,6 +46,7 @@
 
 .category-banner-btn:hover {
   background-color: #d48c31;
+  color: #000000;
 }
 
 .status-box {
@@ -160,7 +161,15 @@
 }
 
 .mini-item-cover-placeholder {
-  display: none;
+  align-items: center;
+  background-color: #252525;
+  color: #e0e0e0;
+  display: flex;
+  font-size: 0.58rem;
+  justify-content: center;
+  line-height: 1.15;
+  padding: 0.2rem;
+  text-align: center;
 }
 
 .mini-item-copy {
@@ -192,7 +201,7 @@
 
 .mini-status-select {
   background-color: #242424;
-  border: 1px solid #666666;
+  border: 1px solid #888888;
   border-radius: 4px;
   color: #ffffff;
   cursor: pointer;
@@ -263,7 +272,7 @@
 
 .page-btn {
   background-color: #333333;
-  border: 1px solid #555555;
+  border: 1px solid #888888;
   color: #ffffff;
   border-radius: 4px;
   padding: 0.25rem 0.6rem;
@@ -275,11 +284,11 @@
 .page-btn:hover:not(:disabled) {
   background-color: #e59d42;
   border-color: #e59d42;
-  color: #ffffff;
+  color: #111111;
 }
 
 .page-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -369,6 +378,12 @@
     min-height: 1.35rem;
     min-width: 1.35rem;
     padding: 0 0.35rem;
+  }
+
+  .mobile-media-tabs button.active .mobile-tab-count,
+  .mobile-status-tabs button.active .mobile-tab-count {
+    background-color: #111111;
+    color: #ffffff;
   }
 
   .shelf-columns-container {

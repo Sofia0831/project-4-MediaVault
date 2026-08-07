@@ -12,7 +12,7 @@
 
 .breadcrumb-back-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #777;
   color: #e0e0e0;
   padding: 5px 12px;
   border-radius: 6px;
@@ -52,13 +52,28 @@
 
 .breadcrumb-item a {
   color: #ffc107; /* Gold accent link */
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
   transition: color 0.2s ease;
 }
 
 .breadcrumb-item a:hover {
   text-decoration: underline;
   color: #ffd54f;
+}
+
+.breadcrumb-item a:visited {
+  color: #e8b84a;
+}
+
+.breadcrumb-item a:active {
+  color: #fff0b3;
+}
+
+.breadcrumb-back-btn:focus-visible,
+.breadcrumb-item a:focus-visible {
+  outline: 3px solid #f7cb15;
+  outline-offset: 3px;
 }
 
 .breadcrumb-separator {

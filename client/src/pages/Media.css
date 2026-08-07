@@ -9,30 +9,71 @@
 }
 
 .catalogue-controls {
-  max-width: 900px;
+  max-width: 1100px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   gap: 1rem;
-  align-items: center;
+  align-items: end;
   padding: 0 1rem;
   box-sizing: border-box;
 }
 
+.catalogue-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.catalogue-field label {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.search-field {
+  flex: 2 1 320px;
+}
+
+.filter-field {
+  flex: 1 1 190px;
+}
+
 .wireframe-search {
   background-color: #e59d42;
-  color: #ffffff;
+  color: #111111;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 25px;
   font-size: 1.1rem;
   font-weight: bold;
-  flex: 2;
+  width: 100%;
   min-width: 180px;
 }
 
-input::placeholder {
-  color: whitesmoke;
+.wireframe-search:focus-visible,
+.catalogue-select:focus-visible,
+.add-catalogue-btn:focus-visible,
+.clear-catalogue-btn:focus-visible,
+.pagination-btn:focus-visible,
+.wireframe-media-card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.catalogue-select {
+  min-height: 49px;
+  width: 100%;
+  border: 2px solid #e59d42;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  padding: 0.7rem 2.25rem 0.7rem 0.8rem;
+  font: inherit;
+}
+
+.wireframe-search::placeholder {
+  color: #282828;
 }
 
 .filter-wrapper {
@@ -43,7 +84,7 @@ input::placeholder {
 
 .wireframe-filter-btn {
   background-color: #e59d42;
-  color: #ffffff !important;
+  color: #111111 !important;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 25px;
@@ -62,7 +103,7 @@ input::placeholder {
 }
 
 .add-catalogue-btn {
-  background-color: #6366f1;
+  background-color: #4338ca;
   color: white;
   border: none;
   padding: 0.8rem 1.2rem;
@@ -70,6 +111,39 @@ input::placeholder {
   font-weight: bold;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.clear-catalogue-btn {
+  min-height: 49px;
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.clear-catalogue-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.catalogue-message {
+  margin: 3rem auto 1rem;
+  padding: 1.5rem;
+  max-width: 42rem;
+  text-align: center;
+}
+
+.catalogue-message h2 {
+  margin-bottom: 0.5rem;
+}
+
+.catalogue-error {
+  border: 1px solid #ff8b8b;
+  border-radius: 8px;
+  color: #ffd2d2;
 }
 
 .catalogue-grid {
@@ -95,6 +169,10 @@ input::placeholder {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
+.wireframe-media-card:focus-visible {
+  transform: translateY(-4px);
+}
+
 .poster-wrapper {
   width: 100%;
   aspect-ratio: 2 / 3;
@@ -105,6 +183,17 @@ input::placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.book-catalogue-card .poster-wrapper {
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.book-catalogue-card .media-poster {
+  display: block;
+  inset: 0;
+  position: absolute;
 }
 
 .wireframe-media-card h3 {
@@ -134,7 +223,7 @@ input::placeholder {
 .pagination-btn {
   background-color: #2a2a2a;
   color: #fff;
-  border: 1px solid #444;
+  border: 1px solid #777;
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
@@ -146,7 +235,7 @@ input::placeholder {
 }
 
 .pagination-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
@@ -159,6 +248,18 @@ input::placeholder {
   .catalogue-controls {
     flex-wrap: wrap;
     gap: 0.75rem;
+  }
+
+  .catalogue-field,
+  .search-field,
+  .filter-field {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .add-catalogue-btn,
+  .clear-catalogue-btn {
+    flex: 1 1 calc(50% - 0.5rem);
   }
 
   .wireframe-search {
@@ -191,7 +292,4 @@ input::placeholder {
     padding: 0.6rem 1rem;
   }
 
-  .wireframe-media-card {
-    height: 100px;
-  }
 }

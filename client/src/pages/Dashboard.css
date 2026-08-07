@@ -70,7 +70,7 @@
 
 .carousel-control:disabled {
   cursor: default;
-  opacity: 0.35;
+  opacity: 0.7;
 }
 
 .carousel-control:focus-visible,
@@ -103,10 +103,12 @@
 }
 
 .carousel-cover-wrap {
+  --carousel-cover-width: 213.333px;
   align-items: center;
   display: flex;
   height: 320px;
   justify-content: center;
+  min-width: 0;
 }
 
 .carousel-cover,
@@ -116,6 +118,7 @@
   height: 100%;
   max-width: 100%;
   object-fit: cover;
+  width: min(100%, var(--carousel-cover-width));
 }
 
 .carousel-cover-placeholder {
@@ -125,9 +128,11 @@
   border: 1px solid var(--clr-primary-border);
   color: var(--clr-primary);
   display: flex;
-  font-size: 2rem;
+  font-size: 1rem;
   font-weight: 800;
   justify-content: center;
+  padding: 1rem;
+  text-align: center;
 }
 
 .carousel-copy h2 {
@@ -202,6 +207,7 @@
   gap: 30px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   width: 100%;
+  min-height: 280px;
 }
 
 .media-card {
@@ -212,6 +218,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 280px;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -241,6 +248,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 210px;
   padding: 2.25rem 1.5rem;
 }
 
@@ -347,12 +355,17 @@
     grid-column: 1 / -1;
     grid-row: 1;
     grid-template-columns: 1fr;
-    min-height: 0;
+    min-height: 560px;
     text-align: center;
   }
 
   .carousel-cover-wrap {
+    --carousel-cover-width: 160px;
     height: 240px;
+  }
+
+  .carousel-state {
+    min-height: 612px;
   }
 
   .carousel-copy {

@@ -4,7 +4,7 @@ const movieController = {};
 
 movieController.searchMovies = async (req, res) => {
   try {
-    const { query, page } = req.query;
+    const { query, page, genre } = req.query;
 
     if (!query) {
       return res.status(400).json({
@@ -12,12 +12,12 @@ movieController.searchMovies = async (req, res) => {
       });
     }
 
-    const movies = await tmdbService.searchMovies(query, page);
+    const movies = await tmdbService.searchMovies(query, page, genre);
 
     res.json(movies);
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Movie search is temporarily unavailable. Please try again.",
     });
   }
 };
@@ -29,7 +29,7 @@ movieController.getMovie = async (req, res) => {
     res.json(movie);
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Movie details are temporarily unavailable. Please try again.",
     });
   }
 };
@@ -43,21 +43,21 @@ movieController.getTrending = async (req, res) => {
     res.json(movies);
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Trending movies are temporarily unavailable. Please try again.",
     });
   }
 };
 
 movieController.getPopular = async (req, res) => {
   try {
-    const { page } = req.query;
+    const { page, genre } = req.query;
 
-    const movies = await tmdbService.getPopularMovies(page);
+    const movies = await tmdbService.getPopularMovies(page, genre);
 
     res.json(movies);
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Popular movies are temporarily unavailable. Please try again.",
     });
   }
 };
@@ -77,7 +77,7 @@ movieController.getRecommendations = async (req, res) => {
     res.json(movies);
   } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Movie recommendations are temporarily unavailable. Please try again.",
     });
   }
 };

@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import mediaVaultLogo from "../assets/Logo_MV.png";
+import mediaVaultLogoSmall from "../assets/Logo_MV-138.webp";
+import mediaVaultLogo from "../assets/Logo_MV.webp";
 import "../components/HeaderNav.css";
 
 const HeaderNav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoggedIn, logout } = useAuth();
 
   const toggleMenu = () => {
@@ -17,6 +19,11 @@ const HeaderNav = () => {
     navigate(path);
     setIsOpen(false);
   };
+
+  const navProps = (path) => ({
+    className: `nav-button${location.pathname === path ? " active" : ""}`,
+    "aria-current": location.pathname === path ? "page" : undefined,
+  });
 
   const handleLogout = async () => {
     try {
@@ -36,7 +43,17 @@ const HeaderNav = () => {
         aria-label="MediaVault Home"
         onClick={() => setIsOpen(false)}
       >
-        <img className="logo-img" src={mediaVaultLogo} alt="MediaVault Home" />
+        <img
+          className="logo-img"
+          src={mediaVaultLogo}
+          srcSet={`${mediaVaultLogoSmall} 138w, ${mediaVaultLogo} 276w`}
+          sizes="(max-width: 800px) 200px, 276px"
+          alt="MediaVault Home"
+          width="276"
+          height="100"
+          loading="eager"
+          fetchPriority="high"
+        />
       </Link>
 
       {isLoggedIn && (
@@ -53,19 +70,19 @@ const HeaderNav = () => {
 
           <nav className={`nav-bar ${isOpen ? "show" : ""}`}>
             <button
-              className="nav-button"
+              {...navProps("/dashboard")}
               onClick={() => handleNavigate("/dashboard")}
             >
               Home
             </button>
             <button
-              className="nav-button"
+              {...navProps("/shelf")}
               onClick={() => handleNavigate("/shelf")}
             >
               Shelf
             </button>
-            <button className="nav-button" onClick={() => handleNavigate("/movies")}>Movies</button>
-            <button className="nav-button" onClick={() => handleNavigate("/books")}>Books</button>
+            <button {...navProps("/movies")} onClick={() => handleNavigate("/movies")}>Movies</button>
+            <button {...navProps("/books")} onClick={() => handleNavigate("/books")}>Books</button>
             <button className="nav-button" onClick={handleLogout}>
               Logout
             </button>

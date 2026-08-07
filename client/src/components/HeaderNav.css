@@ -1,34 +1,37 @@
 .header {
-  min-height: 88px;
+  min-height: 120px;
   position: relative;
   background-color: var(--clr-primary);
-  padding: 10px clamp(16px, 4vw, 48px);
+  padding: 12px clamp(16px, 4vw, 48px);
   display: flex;
+  gap: 2rem;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
 }
 
-.logo-link {
+a.logo-link:link,
+a.logo-link:visited {
+  color: #000;
   display: inline-flex;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
   text-decoration: none;
 }
 
-.logo-link:focus-visible {
+a.logo-link:focus-visible {
   border-radius: 4px;
   outline: 3px solid var(--clr-text-dark);
   outline-offset: 4px;
+  box-shadow: 0 0 0 5px #fff;
 }
 
 .logo-img {
   display: block;
   height: auto;
-  max-height: 66px;
-  max-width: min(280px, 34vw);
+  max-width: 276px;
   object-fit: contain;
-  width: auto;
+  width: clamp(240px, 20vw, 276px);
 }
 
 .nav-bar {
@@ -42,22 +45,31 @@
 .nav-button {
   background-color: var(--clr-nav-button);
   padding: 8px 20px;
-  color: var(--clr-text-white);
+  color: var(--clr-text-dark);
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  outline: none;
+  border: 1px solid rgba(0, 0, 0, 0.35);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--clr-primary-light);
   color: var(--clr-text-dark);
 }
 
 .nav-button.active {
   background-color: var(--clr-active-accent);
   color: var(--clr-text-dark);
+}
+
+.nav-button:focus-visible,
+.hamburger:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .hamburger {
@@ -70,14 +82,13 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  outline: none;
   margin-left: auto;
 }
 
 .hamburger .line {
   width: 100%;
   height: 3px;
-  background-color: var(--clr-text-white);
+  background-color: var(--clr-text-dark);
   border-radius: 2px;
   transition: all 0.3s ease-in-out;
 }
@@ -85,13 +96,14 @@
 @media (max-width: 800px) {
   .header {
     flex-direction: row;
-    min-height: 70px;
-    padding: 8px 16px;
+    gap: 1rem;
+    min-height: 94px;
+    padding: 10px 16px;
   }
 
   .logo-img {
-    max-height: 50px;
-    max-width: min(220px, 68vw);
+    max-width: 200px;
+    width: clamp(180px, 51vw, 200px);
   }
 
   .hamburger {
