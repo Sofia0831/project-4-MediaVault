@@ -46,11 +46,13 @@ const formatBookItem = (item) => {
   const volumeInfo = item.volumeInfo || {};
   const imageLinks = volumeInfo.imageLinks || {};
 
-  const thumbnail = normalizeBookCoverUrl(imageLinks.thumbnail
-    ? imageLinks.thumbnail.replace("http://", "https://")
-    : imageLinks.smallThumbnail
-    ? imageLinks.smallThumbnail.replace("http://", "https://")
-    : null);
+  const thumbnail = normalizeBookCoverUrl(
+    imageLinks.thumbnail
+      ? imageLinks.thumbnail.replace("http://", "https://")
+      : imageLinks.smallThumbnail
+        ? imageLinks.smallThumbnail.replace("http://", "https://")
+        : null
+  );
 
   return {
     id: item.id,
@@ -97,7 +99,12 @@ export const getPopularBooks = async (page = 1, maxResults = 20, subject = "") =
 /**
  * Search books by query
  */
-export const searchBooks = async (query, page = 1, maxResults = 20, subject = "") => {
+export const searchBooks = async (
+  query,
+  page = 1,
+  maxResults = 20,
+  subject = ""
+) => {
   if (!query.trim()) return getPopularBooks(page, maxResults, subject);
   const subjectParam = subject ? `&subject=${encodeURIComponent(subject)}` : "";
   const response = await bookRequest(
@@ -119,49 +126,12 @@ export const getBookDetails = async (bookId) => {
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || "Unable to load book details. Please try again.");
-    }
-
-    const item = await response.json();
-
-    // Fetch author names
-    const authorRefs =
-      item.authors?.map((author) => author.key || author.author?.key) ||
-      item.author_key?.map((key) => `/authors/${key}`) ||
-      [];
-
-    if (authorRefs.length > 0) {
-      const authorNames = await Promise.all(
-        authorRefs.map(async (authorPath) => {
-          try {
-            const response = await bookRequest(`${BASE_URL}${authorPath}`);
-
-            if (!response.ok) return null;
-
-            const author = await response.json();
-            return author.name;
-          } catch {
-            return null;
-          }
-        })
+      throw new Error(
+        data.message || "Unable to load book details. Please try again."
       );
-
-      item.author_name = authorNames.filter(Boolean);
     }
 
-    // Fetch work description
-    if (item.works?.length) {
-      const workPath = item.works[0].key.replace("/works", "");
-
-      const response2 = await bookRequest(`${BASE_URL}${workPath}`);
-
-      if (response2.ok) {
-        const work = await response2.json();
-        item.description = work.description;
-      }
-    }
-
-    return formatBookItem(item);
+    return formatBookItem(await response.json());
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(

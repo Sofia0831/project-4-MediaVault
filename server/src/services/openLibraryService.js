@@ -51,10 +51,16 @@ openLibraryService.searchBooks = async (query, page = 1, limit = 20, subject) =>
 /* *****************************
  * Book Details
  * ***************************** */
-openLibraryService.getBook = async (workId) =>
-  sanitizeBookCoverIds(await apiClient(
-    `${BASE}/works/${workId}.json`
-  ));
+openLibraryService.getBook = async (recordId) => {
+  const normalizedId = String(recordId)
+    .replace(/^\/?(?:books|works)\//i, "")
+    .trim();
+  const resource = /M$/i.test(normalizedId) ? "books" : "works";
+
+  return sanitizeBookCoverIds(
+    await apiClient(`${BASE}/${resource}/${encodeURIComponent(normalizedId)}.json`)
+  );
+};
 
 
 openLibraryService.getAuthor = (authorId) =>

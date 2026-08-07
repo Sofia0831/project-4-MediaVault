@@ -158,9 +158,6 @@ GET {{baseUrl}}/api/media/books/recommendations
 GET {{baseUrl}}/api/media/books/OL9743254M
 
 
-###
-GET {{baseUrl}}/api/media/books/authors/OL22019A
-
 ###########################################################
 # GLOBAL MEDIA SEARCH
 ###########################################################
