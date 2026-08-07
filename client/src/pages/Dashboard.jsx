@@ -12,7 +12,21 @@ const statusLabels = {
   completed: "Completed",
 };
 
-const AUTO_ADVANCE_MS = 7000;
+const AUTO_ADVANCE_MS = 2000;
+
+const getFirstDisplayableIndex = (shelfItems) => {
+  const coverIndex = shelfItems.findIndex((item) => {
+    if (item.media_type === "book") {
+      return Boolean(normalizeBookCoverUrl(item.cover_url));
+    }
+    return typeof item.cover_url === "string" && item.cover_url.trim();
+  });
+
+  return coverIndex >= 0 ? coverIndex : 0;
+};
+
+const getValidIndex = (index, itemCount) =>
+  Number.isInteger(index) && index >= 0 && index < itemCount ? index : 0;
 
 const Dashboard = ({ user }) => {
   const navigate = useNavigate();
@@ -23,56 +37,90 @@ const Dashboard = ({ user }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocusWithin, setIsFocusWithin] = useState(false);
   const [priorityCoverId, setPriorityCoverId] = useState(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => {
+      setPrefersReducedMotion(motionQuery.matches);
+    };
+
+    updateMotionPreference();
+    motionQuery.addEventListener?.("change", updateMotionPreference);
+    return () => motionQuery.removeEventListener?.("change", updateMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
     const loadSavedMedia = async () => {
       try {
+        setLoading(true);
         setError("");
         const shelf = await getShelf();
         const shelfItems = Array.isArray(shelf) ? shelf : [];
-        const initialCoverIndex = shelfItems.findIndex((item) => {
-          if (item.media_type === "book") {
-            return Boolean(normalizeBookCoverUrl(item.cover_url));
-          }
-          return typeof item.cover_url === "string" && item.cover_url.trim();
-        });
+        const initialIndex = getFirstDisplayableIndex(shelfItems);
 
+        if (ignore) return;
         setItems(shelfItems);
-        if (initialCoverIndex >= 0) {
-          setActiveIndex(initialCoverIndex);
-          setPriorityCoverId(shelfItems[initialCoverIndex].id);
-        }
+        setActiveIndex(initialIndex);
+        setPriorityCoverId(shelfItems[initialIndex]?.id ?? null);
       } catch (err) {
+        if (ignore) return;
+        setItems([]);
+        setActiveIndex(0);
+        setPriorityCoverId(null);
         setError(err.message);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
     loadSavedMedia();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {
-    if (items.length <= 1 || isHovered || isFocusWithin) {
+    if (
+      items.length <= 1 ||
+      isHovered ||
+      isFocusWithin ||
+      prefersReducedMotion
+    ) {
       return undefined;
     }
 
     const timerId = window.setTimeout(() => {
-      setActiveIndex((index) => (index + 1) % items.length);
+      setActiveIndex((index) =>
+        (getValidIndex(index, items.length) + 1) % items.length
+      );
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearTimeout(timerId);
-  }, [activeIndex, isFocusWithin, isHovered, items.length]);
+  }, [
+    activeIndex,
+    isFocusWithin,
+    isHovered,
+    items.length,
+    prefersReducedMotion,
+  ]);
 
   const showPrevious = () => {
-    setActiveIndex((index) => (index - 1 + items.length) % items.length);
+    setActiveIndex((index) =>
+      (getValidIndex(index, items.length) - 1 + items.length) % items.length
+    );
   };
 
   const showNext = () => {
-    setActiveIndex((index) => (index + 1) % items.length);
+    setActiveIndex((index) =>
+      (getValidIndex(index, items.length) + 1) % items.length
+    );
   };
 
-  const activeItem = items[activeIndex];
+  const safeActiveIndex = getValidIndex(activeIndex, items.length);
+  const activeItem = items[safeActiveIndex];
   const activeCoverUrl = activeItem?.media_type === "book"
     ? normalizeBookCoverUrl(activeItem.cover_url)
     : activeItem?.cover_url?.trim() || null;
@@ -114,13 +162,24 @@ const Dashboard = ({ user }) => {
               setIsFocusWithin(false);
             }
           }}
+          onKeyDown={(event) => {
+            if (items.length < 2) return;
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              showPrevious();
+            } else if (event.key === "ArrowRight") {
+              event.preventDefault();
+              showNext();
+            }
+          }}
+          tabIndex="0"
         >
           <div className="carousel-heading">
             <div>
               <p className="eyebrow">Your MediaVault</p>
               <h1 id="saved-carousel-title">Welcome, {displayName}</h1>
             </div>
-            {items.length > 0 && <span>{activeIndex + 1} / {items.length}</span>}
+            {items.length > 0 && <span>{safeActiveIndex + 1} / {items.length}</span>}
           </div>
 
           {loading && <div className="carousel-state">Loading your saved media...</div>}

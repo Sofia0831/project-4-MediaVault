@@ -24,7 +24,7 @@ const BookDetails = lazy(() => import("./pages/BookDetails"));
 const SavedMediaDetails = lazy(() => import("./pages/SavedMediaDetails"));
 
 function AppRoutes() {
-  const { isLoggedIn, user, loading } = useAuth();
+  const { isLoggedIn, user, loading, logoutRedirectPending } = useAuth();
 
   if (loading) {
     return <h2>Loading...</h2>;
@@ -64,7 +64,11 @@ function AppRoutes() {
             {/* Protected routes wrapped in Layout */}
             <Route
               element={
-                isLoggedIn ? <Layout /> : <Navigate to="/login" replace />
+                isLoggedIn ? (
+                  <Layout />
+                ) : (
+                  <Navigate to={logoutRedirectPending ? "/" : "/login"} replace />
+                )
               }
             >
               <Route path="/dashboard" element={<Dashboard user={user} />} />

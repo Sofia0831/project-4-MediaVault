@@ -404,3 +404,10 @@
     border-radius: 16px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-page .carousel-item,
+  .dashboard-page .media-card {
+    transition: none;
+  }
+}
