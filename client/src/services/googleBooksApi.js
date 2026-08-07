@@ -23,7 +23,7 @@ const formatBookItem = (item) => {
       ratingsCount: 0,
       thumbnail: coverId
         ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
-        : "https://via.placeholder.com/128x192?text=No+Cover",
+        : "https://upload.wikimedia.org/wikipedia/commons/b/b9/No_Cover.jpg",
     };
   }
 
@@ -34,7 +34,7 @@ const formatBookItem = (item) => {
     ? imageLinks.thumbnail.replace("http://", "https://")
     : imageLinks.smallThumbnail
     ? imageLinks.smallThumbnail.replace("http://", "https://")
-    : "https://via.placeholder.com/128x192?text=No+Cover";
+    : "https://upload.wikimedia.org/wikipedia/commons/b/b9/No_Cover.jpg";
 
   return {
     id: item.id,
@@ -120,47 +120,6 @@ export const getBookDetails = async (bookId) => {
     }
 
     const item = await response.json();
-
-    // Fetch author names
-    const authorRefs =
-      item.authors?.map((author) => author.key || author.author?.key) ||
-      item.author_key?.map((key) => `/authors/${key}`) ||
-      [];
-
-    if (authorRefs.length > 0) {
-      const authorNames = await Promise.all(
-        authorRefs.map(async (authorPath) => {
-          try {
-            const response = await fetch(`${BASE_URL}${authorPath}`, {
-              credentials: "include",
-            });
-
-            if (!response.ok) return null;
-
-            const author = await response.json();
-            return author.name;
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      item.author_name = authorNames.filter(Boolean);
-    }
-
-    // Fetch work description
-    if (item.works?.length) {
-      const workPath = item.works[0].key.replace("/works", "");
-
-      const response2 = await fetch(`${BASE_URL}${workPath}`, {
-        credentials: "include",
-      });
-
-      if (response2.ok) {
-        const work = await response2.json();
-        item.description = work.description;
-      }
-    }
 
     return formatBookItem(item);
   } catch (error) {
