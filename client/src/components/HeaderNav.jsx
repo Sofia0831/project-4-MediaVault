@@ -27,9 +27,10 @@ const HeaderNav = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      setIsOpen(false);
-      navigate("/login", { replace: true });
+      await logout(() => {
+        setIsOpen(false);
+        navigate("/", { replace: true });
+      });
     } catch (error) {
       console.error("Logout failed:", error);
     }
